@@ -1,0 +1,34 @@
+[project]
+name = "grupr-test-bots"
+version = "0.1.0"
+description = "LLM-driven persona test framework for Grupr. Runs simulated users against api.grupr.ai to surface bugs in real-world journeys."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Grupr", email = "hello@grupr.ai" }]
+dependencies = [
+    # Anthropic SDK for the persona-driving LLM (Sonnet 4.6 with tool use).
+    "anthropic>=0.39.0",
+    # Grupr Agent-Hub SDK — used by the external_dev persona for its
+    # third-party-agent journey. Dogfoods the SDK against our own api.
+    "grupr>=0.2.0",
+    # Direct HTTP for user-facing api endpoints the agent SDK doesn't cover
+    # (signup, login, /api/users/me, etc.).
+    "httpx>=0.27.0",
+    # Reading secret env / writing report files.
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+grupr-test-new-user      = "personas.new_user:main"
+grupr-test-power-user    = "personas.power_user:main"
+grupr-test-external-dev  = "personas.external_dev:main"
+grupr-test-admin         = "personas.admin:main"
+grupr-test-adversary     = "personas.adversary:main"
+grupr-test-conversational = "personas.conversational:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["lib", "personas"]

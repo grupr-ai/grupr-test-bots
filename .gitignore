@@ -1,0 +1,18 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+uv.lock
+
+# Run output is timestamped and large; we commit summary.md only for
+# named runs that are worth preserving as a baseline reference.
+runs/*/
+!runs/.gitkeep
+# Day-3 baseline — the sweep that surfaced the P0s fixed in api a4ff4c7
+!runs/2026-05-13_pre-launch/
+!runs/2026-05-13_pre-launch/summary.md
