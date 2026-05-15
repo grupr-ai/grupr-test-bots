@@ -280,22 +280,49 @@ class UserClient:
         _, body = self._request("GET", "/api/gruprs/trending", params={"limit": limit})
         return [GruprSummary.from_api(g) for g in body.get("data", []) or []]
 
+    # Friendly-name aliases the persona LLMs reach for ("workshop", "arena",
+    # "groupchat") get translated to the api's actual enum here. Anything
+    # else passes through verbatim — if the api rejects it, the persona
+    # sees the api's own validation error rather than a silent rewrite.
+    # Caught by the 2026-05-15 persona sweep: all 3/3 personas that
+    # exercised create_grupr hit the field-name + enum-value mismatch.
+    _GRUPR_TYPE_ALIASES = {
+        "workshop":   "ai_workshop",
+        "arena":      "ai_arena",
+        "groupchat":  "group_chat",
+        "group_chat": "group_chat",
+        "ai_workshop": "ai_workshop",
+        "ai_arena":   "ai_arena",
+        "public_chat": "public_chat",
+        "private_chat": "private_chat",
+    }
+
     def create_grupr(
         self,
         name: str,
-        grupr_type: str = "workshop",
+        grupr_type: str = "ai_workshop",
         description: str = "",
         is_public: bool = False,
         category: str = "general",
     ) -> str:
-        """POST /api/gruprs. Returns grupr_id."""
+        """POST /api/gruprs. Returns grupr_id.
+
+        Valid grupr_type values [api side]:
+          ai_workshop, ai_arena, group_chat, public_chat, private_chat.
+
+        Friendly aliases [workshop, arena, groupchat] are translated to
+        their ai_-prefixed equivalents for convenience.
+        """
+        api_type = self._GRUPR_TYPE_ALIASES.get(grupr_type, grupr_type)
         _, body = self._request(
             "POST",
             "/api/gruprs",
             json={
                 "name": name,
                 "description": description,
-                "type": grupr_type,
+                # Api expects "grup_type" [no 'r']. Old code sent "type",
+                # which silently dropped to the missing-field 400 path.
+                "grup_type": api_type,
                 "is_public": is_public,
                 "category": category,
                 "max_members": 50,
