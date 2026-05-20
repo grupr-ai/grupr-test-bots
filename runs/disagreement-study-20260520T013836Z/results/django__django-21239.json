@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "django/django",
+    "pr_number": 21239,
+    "url": "https://github.com/django/django/pull/21239",
+    "title": "Fixed #37085 -- Added support for object-based form media stylesheet assets.",
+    "merged_at": "2026-05-07T14:49:12Z",
+    "diff_loc": 130
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\n**Must-fix**: The Security reviewer raises a valid concern about XSS potential in the `Stylesheet` class. While the code inherits from `MediaAsset` which uses Django's `format_html` (a safe HTML formatter), we should verify that the parent class properly escapes all dynamic content. The reviewers disagree on severity - Architect considers this a clean implementation following existing patterns, while Security flags it as a potential vulnerability.\n\nLooking at the code, the `Stylesheet` class follows the exact same pattern as the existing `Script` class, suggesting the framework already handles escaping. However, Security's concern about input validation is legitimate - malicious attribute injection could occur if attributes aren't properly sanitized by the parent class.\n\n**Should-fix**: Add explicit validation for the `href` parameter to ensure it contains valid URL characters and follows expected patterns (relative paths, absolute URLs, or protocol-relative URLs).\n\n**Nice-to-have**: The CSP documentation suggestion from Security, while not blocking, would be valuable for users implementing external stylesheets.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Clean abstraction hierarchy** (lines 127-131): The `Stylesheet` class properly extends `MediaAsset` with minimal implementation, reusing the parent's rendering logic while providing CSS-specific template and initialization. This follows the open-closed principle well.\n\n2. **Good naming consistency** (lines 127, 201): The `Stylesheet` class name aligns with the existing `Script` class pattern, and the `href` parameter appropriately maps to the HTML attribute name rather than using a generic `path` or `src`.\n\n3. **Appropriate coupling reduction** (lines 194-201): The refactoring replaces inline HTML formatting with `Stylesheet` object creation, properly delegating rendering responsibility to the dedicated class. This improves separation of concerns between `Media.render_css()` and the actual CSS link generation."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Cross-Site Scripting (XSS) Potential** (lines 124-131): The `element_template` in the `Stylesheet` class uses `format_html`, which is generally safe, but any dynamic part such as `href` or attributes should be carefully sanitized to prevent XSS. Ensure that all inputs to these fields are properly validated and escaped. (OWASP A7:2017 - Cross-Site Scripting (XSS))\n\n2. **Lack of Input Validation** (lines 127-131): The `Stylesheet` class constructor does not validate the `href` parameter or any additional attributes. This could lead to the injection of malicious attributes. Consider adding validation logic to ensure proper URL and attribute formats. (OWASP A1:2021 - Broken Access Control)\n\n3. **No CSP Headers** (Documentation): While not directly in the code, the documentation does not mention the importance of setting Content Security Policy (CSP) headers when using external stylesheets. This is crucial to prevent XSS and other injection attacks by restricting the sources of content that can be loaded by the application. (OWASP A6:2017 - Security Misconfiguration)"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\n**Must-fix**: The Security reviewer raises a valid concern about XSS potential in the `Stylesheet` class. While the code inherits from `MediaAsset` which uses Django's `format_html` (a safe HTML formatter), we should verify that the parent class properly escapes all dynamic content. The reviewers disagree on severity - Architect considers this a clean implementation following existing patterns, while Security flags it as a potential vulnerability.\n\nLooking at the code, the `Stylesheet` class follows the exact same pattern as the existing `Script` class, suggesting the framework already handles escaping. However, Security's concern about input validation is legitimate - malicious attribute injection could occur if attributes aren't properly sanitized by the parent class.\n\n**Should-fix**: Add explicit validation for the `href` parameter to ensure it contains valid URL characters and follows expected patterns (relative paths, absolute URLs, or protocol-relative URLs).\n\n**Nice-to-have**: The CSP documentation suggestion from Security, while not blocking, would be valuable for users implementing external stylesheets."
+      }
+    ],
+    "elapsed_s": 25,
+    "raw_grupr_id": "746f130f-7e83-4a62-8dbe-d36b6c2b975d",
+    "timed_out": false
+  },
+  "panel_wall_s": 25,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Line 131 in widgets.py**: The `__init__` method uses `path=href` in the super call, but the parent `MediaAsset` constructor expects the first positional argument to be the path. This should be `super().__init__(href, rel=\"stylesheet\", **attributes)` to maintain consistency with the `Script` class pattern.\n\n2. **Line 201 in widgets.py**: Good refactoring to use the new `Stylesheet` class, but missing the `absolute_path()` call that was present in the original code. Should be `Stylesheet(self.absolute_path(path), media=medium).render(attrs=attrs)`.\n\n3. **Lines 846-847 in test_media.py**: Test case `test_init_with_href_kwarg` appears to test keyword argument usage, but based on the implementation, `Stylesheet` expects `href` as a positional argument, not a keyword argument. This test would fail.\n\n**Notes** (lower-priority observations)\n\n- The documentation additions are clear and consistent with the existing `Script` documentation pattern\n- Good test coverage with the refactored tests using `Stylesheet` instead of the test-only `CSS` class\n- The `element_template` pattern is consistent with the `Script` class implementation\n- Release notes properly document the new feature as a 6.1 addition",
+    "elapsed_s": 18,
+    "input_tokens": 3397,
+    "output_tokens": 335
+  },
+  "single_wall_s": 18,
+  "user_email_var": "GRUPR_TEST_NEW_USER_EMAIL",
+  "completed_at": "2026-05-20T01:47:21Z"
+}

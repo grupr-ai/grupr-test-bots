@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15528,
+    "url": "https://github.com/fastapi/fastapi/pull/15528",
+    "title": "\ud83c\udf10 Update translations for pt (update-outdated)",
+    "merged_at": "2026-05-18T15:15:47Z",
+    "diff_loc": 89
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe specialists agree that these documentation changes are safe to merge. The updates involve:\n- Removing a sponsor link\n- Refactoring sponsor display HTML with improved semantic structure\n- Adding a tabbed testimonials interface with proper ARIA attributes\n- Fixing a typo\n\nWhile the Security specialist notes theoretical XSS concerns with template variables, this is standard documentation templating that presumably has proper sanitization in the build process. The architectural improvements (semantic HTML, proper CSS classes, accessibility attributes) outweigh these standard templating considerations.\n\n**Must-fix**: None - the code assumes existing template sanitization\n**Should-fix**: None identified\n**Nice-to-have**: Consider adding `rel=\"noopener noreferrer\"` to external links for additional security hardening",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nThe changes involve documentation updates with minimal architectural impact:\n\n1. **Line 33**: Simple removal of a sponsor link - no architectural concerns\n2. **Lines 57-105**: HTML structure refactoring for sponsor display - improves semantic structure with proper CSS classes and containers\n3. **Lines 108-149**: Addition of a tabbed interface for company testimonials - well-structured HTML with proper ARIA attributes and semantic naming\n4. **Line 822**: Minor typo fix in virtual environments documentation\n\nThe naming conventions are clear (`fastapi-sponsors`, `fastapi-opinions`), the HTML structure follows proper semantic patterns, and the changes maintain good separation of concerns between content and presentation."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nThe changes made to the documentation are largely related to HTML and CSS updates with no direct security implications. However, minor considerations should always be taken into account:\n\n1. **Line 54**: Usage of unescaped template variables in HTML (e.g., `{{ sponsor.url }}`, `{{ sponsor.title }}`) could lead to Cross-Site Scripting (XSS) if not properly sanitized. [OWASP A7:2017 - Cross-Site Scripting (XSS)]\n\n2. **Lines 82-149**: Introduction of ARIA attributes in the tabbed interface. While this is good for accessibility, developers should ensure these attributes are correctly implemented to avoid any potential security or usability issues. [OWASP A11:2021 - Accessibility and Usability Misconfiguration]\n\n3. **Line 138**: External links should be reviewed for security implications like linking to malicious sites. Ensure that links are from trusted sources and, where applicable, consider using `rel=\"noopener noreferrer\"` to prevent potential window.opener attacks. [OWASP A1:2017 - Injection]\n\nOverall, the documentation updates are primarily cosmetic and structural with minimal direct security concerns, assuming proper data sanitization and validation practices are in place."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe specialists agree that these documentation changes are safe to merge. The updates involve:\n- Removing a sponsor link\n- Refactoring sponsor display HTML with improved semantic structure\n- Adding a tabbed testimonials interface with proper ARIA attributes\n- Fixing a typo\n\nWhile the Security specialist notes theoretical XSS concerns with template variables, this is standard documentation templating that presumably has proper sanitization in the build process. The architectural improvements (semantic HTML, proper CSS classes, accessibility attributes) outweigh these standard templating considerations.\n\n**Must-fix**: None - the code assumes existing template sanitization\n**Should-fix**: None identified\n**Nice-to-have**: Consider adding `rel=\"noopener noreferrer\"` to external links for additional security hardening"
+      }
+    ],
+    "elapsed_s": 21,
+    "raw_grupr_id": "02166df5-f3fe-4618-8fff-400facc08bb0",
+    "timed_out": false
+  },
+  "panel_wall_s": 21,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. Line 820: Typo fix from \"prisoner-of-askaban\" to \"prisoner-of-azkaban\" - corrects an important inconsistency in the example\n2. Lines 15, 21: Changed \"info\" to \"note\" in markdown annotations - maintains consistency with documentation style\n3. Line 33: Removed Speakeasy from the list of client generation tools - likely a business/partnership decision\n\n**Notes** (lower-priority observations)\n\n- Major visual enhancement: Added structured HTML for sponsor sections (lines 57-77) with proper CSS classes for better presentation\n- Added a new opinions carousel section (lines 85-117) with tab navigation for company testimonials\n- Added FastAPI Conf promotional section (lines 150-156)\n- Minor text correction on line 131: \"and\" instead of \"e\" in author names\n- All changes appear to be Portuguese translation updates maintaining consistency with the main documentation",
+    "elapsed_s": 15,
+    "input_tokens": 4515,
+    "output_tokens": 234
+  },
+  "single_wall_s": 15,
+  "user_email_var": "GRUPR_TEST_CONV_B_EMAIL",
+  "completed_at": "2026-05-20T01:52:09Z"
+}

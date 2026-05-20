@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93919,
+    "url": "https://github.com/vercel/next.js/pull/93919",
+    "title": "[backport] Fix server action forwarding loop with middleware rewrites",
+    "merged_at": "2026-05-19T07:11:50Z",
+    "diff_loc": 122
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\n**Most critical issue**: **Potential for infinite forwarding loops if header check fails** (must-fix)\n\nThe security reviewer correctly identifies that the forwarding loop prevention relies solely on the `x-action-forwarded` header check. If this header is missing, corrupted, or removed by intermediate proxies/middleware, the infinite loop protection fails. This could lead to denial of service through resource exhaustion.\n\n**Synthesis of reviews**:\n- Both reviewers agree on shipping with changes\n- The architect focuses on code organization and naming issues (should-fix)\n- The security reviewer identifies the more critical operational risk around the header-based loop prevention mechanism\n- Both note concerns about the expanded responsibility of `createForwardedActionResponse`\n\n**Recommended fixes**:\n1. **Must-fix**: Add additional loop detection mechanisms beyond just the header check (e.g., request counter, TTL, or circuit breaker pattern)\n2. **Should-fix**: Refactor `createForwardedActionResponse` to separate concerns as both reviewers noted\n3. **Nice-to-have**: Improve test organization and naming conventions as suggested by the architect",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 Findings:**\n\n1. **Naming inconsistency and unclear abstraction** (lines 278-292): The function `createForwardedActionResponse` has grown to handle two distinct responsibilities - forwarding successful responses AND handling action-not-found cases. The function name no longer accurately reflects its expanded scope. Consider extracting the not-found handling into a separate function or renaming to better represent the dual responsibility.\n\n2. **Coupling through header constants** (lines 288-289): The code directly couples to `NEXT_ACTION_NOT_FOUND_HEADER` for both reading and writing, creating a tight dependency on this specific header implementation. Consider abstracting this into a more cohesive action response handler that encapsulates the header logic and response creation.\n\n3. **Test file naming and organization** (test files): The proxy functionality is defined in `proxy.ts` but this file name doesn't clearly indicate it's middleware. Additionally, the error boundary component is mixed with the page-specific test setup. Consider moving the `ErrorBoundary` to a shared test utilities location since it's a reusable testing component, and rename `proxy.ts` to `middleware.ts` or similar for clarity."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 Findings:**\n\n1. **Security Misconfiguration** (Lines 288-292): The setting of headers directly within the function for error handling could lead to security misconfigurations, especially if this logic is reused elsewhere. Consider creating a centralized error handling utility to ensure consistent and secure header management across the application. This aligns with OWASP A06:2021 - Security Misconfiguration.\n\n2. **Injection Risk** (Line 292): The response body uses a static string \"Server action not found.\" which is safe in this context. However, if this were to be dynamically generated from user input or other sources, it could introduce a content injection risk. Ensure all user-generated content is properly sanitized to prevent injection vulnerabilities, addressing OWASP A01:2021 - Broken Access Control.\n\n3. **Improper Error Handling** (Lines 707-719): The logic to prevent action forwarding loops lacks robust error handling mechanisms for other potential failures when selecting a worker. This could expose the application to denial of service or other unexpected failures. Implement comprehensive error handling to manage and log all potential errors, in line with OWASP A10:2021 - Server-Side Request Forgery (SSRF)."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\n**Most critical issue**: **Potential for infinite forwarding loops if header check fails** (must-fix)\n\nThe security reviewer correctly identifies that the forwarding loop prevention relies solely on the `x-action-forwarded` header check. If this header is missing, corrupted, or removed by intermediate proxies/middleware, the infinite loop protection fails. This could lead to denial of service through resource exhaustion.\n\n**Synthesis of reviews**:\n- Both reviewers agree on shipping with changes\n- The architect focuses on code organization and naming issues (should-fix)\n- The security reviewer identifies the more critical operational risk around the header-based loop prevention mechanism\n- Both note concerns about the expanded responsibility of `createForwardedActionResponse`\n\n**Recommended fixes**:\n1. **Must-fix**: Add additional loop detection mechanisms beyond just the header check (e.g., request counter, TTL, or circuit breaker pattern)\n2. **Should-fix**: Refactor `createForwardedActionResponse` to separate concerns as both reviewers noted\n3. **Nice-to-have**: Improve test organization and naming conventions as suggested by the architect"
+      }
+    ],
+    "elapsed_s": 27,
+    "raw_grupr_id": "a16d8d9b-19cc-48f8-9c0f-f72480846f9b",
+    "timed_out": false
+  },
+  "panel_wall_s": 27,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff)\n\n1. Line 281-292: The new code correctly prevents action forward loops by checking `actionWasForwarded` before attempting to forward, and properly handles the action-not-found case by setting appropriate headers and returning a 404 response.\n\n2. Line 722: The condition `if (actionId && !actionWasForwarded)` effectively prevents infinite forwarding loops by only forwarding actions that haven't been forwarded already, which is critical for preventing the described middleware rewrite scenario.\n\n3. Line 7-67 (test file): Comprehensive test coverage that validates the fix by setting up a scenario where middleware rewrites an action POST to a route that doesn't bundle the action, ensuring the error boundary catches the UnrecognizedActionError.\n\n**Notes** (lower-priority observations)\n\n- The error handling pattern using `unstable_isUnrecognizedActionError` in the test's error boundary is appropriate for validating the fix\n- The proxy middleware in the test correctly simulates the problematic rewrite scenario\n- The comment additions clearly explain the rationale for the changes",
+    "elapsed_s": 13,
+    "input_tokens": 2504,
+    "output_tokens": 261
+  },
+  "single_wall_s": 13,
+  "user_email_var": "GRUPR_TEST_EXTERNAL_DEV_EMAIL",
+  "completed_at": "2026-05-20T02:03:17Z"
+}

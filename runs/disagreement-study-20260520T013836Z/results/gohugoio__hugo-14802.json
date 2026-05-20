@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "gohugoio/hugo",
+    "pr_number": 14802,
+    "url": "https://github.com/gohugoio/hugo/pull/14802",
+    "title": "langs/i18n: Improve default content language fallback",
+    "merged_at": "2026-04-25T08:43:38Z",
+    "diff_loc": 81
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\nBoth reviewers agree on the core issues with this code. The most critical problem is the **hardcoded \"en\" fallback** in the translation function (line 176 of `translationProvider.go`). This creates a hidden dependency that violates configuration expectations - if a site has no English translations and the default language is set to something else (like Spanish), the system will still try to fall back to English, potentially returning empty strings or errors.\n\n**Must-fix**:\n- Replace the hardcoded `\"en\"` with a proper fallback mechanism that respects the configured default language or uses a documented constant\n\n**Should-fix**:\n- Rename `defaultLanguage()` to better reflect that it finds the configured default language\n- Refactor the test to use separate test cases instead of progressive string replacement\n\nThe security concerns about injection are theoretical given the context (language codes from configuration), but the hardcoded fallback is a real issue that could cause unexpected behavior in production.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings:**\n\n1. **Naming inconsistency in `defaultLanguage` function** (lines 154-162): The function name suggests it returns a default language, but it actually returns the language matching `DefaultContentLanguage()` config. Consider renaming to `getConfiguredDefaultLanguage` or `findDefaultLanguage` to better reflect its behavior.\n\n2. **Abstraction leak in `getTranslateFunc`** (lines 166-177): The function hardcodes \"en\" as the ultimate fallback (line 176) instead of using a constant or configuration value. This creates a hidden dependency and violates the principle of making implicit behavior explicit.\n\n3. **Test structure coupling** (lines 330-379): The test `TestDefaultContentLanguageFallback14243` uses string replacement to progressively remove files, creating tight coupling between test steps. Each test iteration depends on the previous state, making the test fragile and harder to understand. Consider using separate test cases with explicit file configurations."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings:**\n\n1. **Hardcoded Fallback Language** (translationProvider.go, line 176): The fallback language is hardcoded as \"en\". This could lead to unexpected behavior if the default language setting changes or if other languages are prominent in different deployments. Consider using a configurable setting or constant for better flexibility. [OWASP A6:2021 - Security Misconfiguration]\n\n2. **Potential for Improper Input Handling** (translationProvider.go, lines 166-177): The translation function lookup relies on string manipulation and dynamic language settings. Ensure that input sanitization and validation are appropriately handled to prevent injection attacks, especially when dealing with user input for language settings. [OWASP A1:2021 - Injection]\n\n3. **Test Data Management** (languages_integration_test.go, lines 330-379): The test manipulates file contents directly and uses string replacements to change configurations, which can introduce errors and make the tests difficult to maintain. Consider using fixtures or mock objects to manage test data more cleanly. [OWASP A8:2021 - Software and Data Integrity Failures]"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\nBoth reviewers agree on the core issues with this code. The most critical problem is the **hardcoded \"en\" fallback** in the translation function (line 176 of `translationProvider.go`). This creates a hidden dependency that violates configuration expectations - if a site has no English translations and the default language is set to something else (like Spanish), the system will still try to fall back to English, potentially returning empty strings or errors.\n\n**Must-fix**:\n- Replace the hardcoded `\"en\"` with a proper fallback mechanism that respects the configured default language or uses a documented constant\n\n**Should-fix**:\n- Rename `defaultLanguage()` to better reflect that it finds the configured default language\n- Refactor the test to use separate test cases instead of progressive string replacement\n\nThe security concerns about injection are theoretical given the context (language codes from configuration), but the hardcoded fallback is a real issue that could cause unexpected behavior in production."
+      }
+    ],
+    "elapsed_s": 25,
+    "raw_grupr_id": "a7995560-3033-47d4-be39-5720f011148d",
+    "timed_out": false
+  },
+  "panel_wall_s": 25,
+  "single_model": {
+    "verdict": "ship-with-changes",
+    "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Line 176**: The fallback to hardcoded `\"en\"` in `getTranslateFunc` is problematic. If no translations are found for the current or default language, it falls back to English regardless of the site's configuration. This could result in unexpected English text appearing on non-English sites.\n\n2. **Line 154-161**: The `defaultLanguage` function has a potential nil pointer issue. If no language matches the `defaultContentLanguage` key, it falls back to `conf.Language()` without checking if the Languages collection is properly initialized.\n\n3. **Line 570**: The test assertion change from `\"! WARN\"` to `\"! duplicate menu entry\"` appears unrelated to the i18n changes and should be in a separate commit for clarity.\n\n**Notes** (lower-priority observations)\n\n- The new test `TestDefaultContentLanguageFallback14243` is well-structured and thoroughly tests the fallback chain behavior\n- The logic correctly implements a 4-level fallback: current locale \u2192 current key \u2192 default locale \u2192 default key\n- Consider adding a comment explaining the fallback chain in `getTranslateFunc` for future maintainability",
+    "elapsed_s": 17,
+    "input_tokens": 1765,
+    "output_tokens": 295
+  },
+  "single_wall_s": 17,
+  "user_email_var": "GRUPR_TEST_CONV_B_EMAIL",
+  "completed_at": "2026-05-20T01:56:41Z"
+}

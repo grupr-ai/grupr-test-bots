@@ -1,0 +1,275 @@
+diff --git a/django/forms/widgets.py b/django/forms/widgets.py
+index 697215540285..7e5ddddfcfcc 100644
+--- a/django/forms/widgets.py
++++ b/django/forms/widgets.py
+@@ -24,6 +24,7 @@
+ 
+ __all__ = (
+     "Script",
++    "Stylesheet",
+     "Media",
+     "MediaDefiningClass",
+     "Widget",
+@@ -123,6 +124,13 @@ def __init__(self, src, **attributes):
+         super().__init__(src, **attributes)
+ 
+ 
++class Stylesheet(MediaAsset):
++    element_template = '<link href="{path}"{attributes}>'
++
++    def __init__(self, href, **attributes):
++        super().__init__(path=href, rel="stylesheet", **attributes)
++
++
+ @html_safe
+ class Media:
+     def __init__(self, media=None, css=None, js=None):
+@@ -190,12 +198,7 @@ def render_css(self, *, attrs=None):
+                     else (
+                         path.__html__()
+                         if hasattr(path, "__html__")
+-                        else format_html(
+-                            '<link href="{}" media="{}"{} rel="stylesheet">',
+-                            self.absolute_path(path),
+-                            medium,
+-                            flatatt(attrs) if attrs else "",
+-                        )
++                        else Stylesheet(path, media=medium).render(attrs=attrs)
+                     )
+                 )
+                 for path in self._css[medium]
+diff --git a/docs/releases/6.1.txt b/docs/releases/6.1.txt
+index d0250d3798a9..6f175f76d01d 100644
+--- a/docs/releases/6.1.txt
++++ b/docs/releases/6.1.txt
+@@ -256,6 +256,10 @@ File Uploads
+ Forms
+ ~~~~~
+ 
++* The new asset object :class:`~django.forms.Stylesheet` is available for
++  adding custom HTML-attributes to stylesheet links in form media. See
++  :ref:`paths as objects <form-media-asset-objects>` for more details.
++
+ * The new constant ``django.db.models.fields.BLANK_CHOICE_LABEL`` defines a
+   more accessible and translatable default label for the blank choice in
+   forms, which is appended to most ``choices`` lists. The transitional setting
+diff --git a/docs/topics/forms/media.txt b/docs/topics/forms/media.txt
+index 061231c6d127..f1697d5f394a 100644
+--- a/docs/topics/forms/media.txt
++++ b/docs/topics/forms/media.txt
+@@ -126,6 +126,25 @@ HTML:
+     <link href="https://static.example.com/lo_res.css" media="tv,projector" rel="stylesheet">
+     <link href="https://static.example.com/newspaper.css" media="print" rel="stylesheet">
+ 
++``Stylesheet`` objects
++~~~~~~~~~~~~~~~~~~~~~~
++
++.. versionadded:: 6.1
++
++.. class:: Stylesheet(href, **attributes)
++
++    Represents a stylesheet link. The ``rel`` attribute is set to
++    ``"stylesheet"``.
++
++    The first parameter, ``href``, is the string path to the stylesheet file.
++    See :ref:`the section on paths <form-asset-paths>` for details on how to
++    specify paths to these files.
++
++    The optional keyword arguments, ``**attributes``, are additional HTML
++    attributes set on the rendered ``<link>`` tag.
++
++    See :ref:`form-media-asset-objects` for usage examples.
++
+ ``js``
+ ------
+ 
+@@ -295,8 +314,8 @@ Or if :mod:`~django.contrib.staticfiles` is configured using the
+ Paths as objects
+ ----------------
+ 
+-Assets may also be object-based, using :class:`.Script`.
+-Furthermore, these allow you to pass custom HTML attributes::
++Assets may also be object-based, using :class:`.Script` or
++:class:`.Stylesheet`. These allow you to pass custom HTML attributes::
+ 
+     class Media:
+         js = [
+@@ -319,6 +338,29 @@ HTML:
+             async>
+     </script>
+ 
++Similarly, a :class:`.Stylesheet` object can be used to add a stylesheet
++link with custom HTML attributes::
++
++    class Media:
++        css = {
++            "all": [
++                Stylesheet(
++                    "https://cdn.example.com/print.css",
++                    crossorigin="anonymous",
++                    media="print",
++                ),
++            ]
++        }
++
++If this Media definition were to be rendered, it would become:
++
++.. code-block:: html+django
++
++    <link href="https://cdn.example.com/print.css"
++          crossorigin="anonymous"
++          media="print"
++          rel="stylesheet">
++
+ ``Media`` objects
+ =================
+ 
+diff --git a/tests/forms_tests/tests/test_media.py b/tests/forms_tests/tests/test_media.py
+index 948ba6ec9b52..1ddf10551c47 100644
+--- a/tests/forms_tests/tests/test_media.py
++++ b/tests/forms_tests/tests/test_media.py
+@@ -1,18 +1,10 @@
+ from django.forms import CharField, Form, Media, MultiWidget, TextInput
+-from django.forms.widgets import MediaAsset, Script
++from django.forms.widgets import MediaAsset, Script, Stylesheet
+ from django.template import Context, Template
+ from django.test import SimpleTestCase, override_settings
+ from django.utils.html import html_safe
+ 
+ 
+-class CSS(MediaAsset):
+-    element_template = '<link href="{path}"{attributes}>'
+-
+-    def __init__(self, href, **attributes):
+-        super().__init__(href, **attributes)
+-        self.attributes["rel"] = "stylesheet"
+-
+-
+ @override_settings(STATIC_URL="http://media.example.com/static/")
+ class MediaAssetTestCase(SimpleTestCase):
+     def test_init(self):
+@@ -31,7 +23,9 @@ def test_eq(self):
+ 
+         self.assertNotEqual(MediaAsset("path/to/css"), MediaAsset("path/to/other.css"))
+         self.assertNotEqual(MediaAsset("path/to/css"), "path/to/other.css")
+-        self.assertNotEqual(MediaAsset("path/to/css", media="all"), CSS("path/to/css"))
++        self.assertNotEqual(
++            MediaAsset("path/to/css", media="all"), Stylesheet("path/to/css")
++        )
+ 
+     def test_hash(self):
+         self.assertEqual(hash(MediaAsset("path/to/css")), hash("path/to/css"))
+@@ -117,17 +111,35 @@ def test_render_attrs_conflict(self):
+ 
+ 
+ @override_settings(STATIC_URL="http://media.example.com/static/")
+-class CSSTestCase(SimpleTestCase):
++class StylesheetTestCase(SimpleTestCase):
++    def test_init_with_href_kwarg(self):
++        self.assertEqual(
++            Stylesheet(href="path/to/css").path,
++            "http://media.example.com/static/path/to/css",
++        )
++
++    def test_str(self):
++        self.assertHTMLEqual(
++            str(Stylesheet("path/to/css")),
++            '<link href="http://media.example.com/static/path/to/css"'
++            ' rel="stylesheet">',
++        )
++        self.assertHTMLEqual(
++            str(Stylesheet("path/to/css", media="all")),
++            '<link href="http://media.example.com/static/path/to/css"'
++            ' media="all" rel="stylesheet">',
++        )
++
+     def test_render_with_attrs(self):
+-        asset = CSS("/path/to/css")
++        asset = Stylesheet("/path/to/css")
+         self.assertHTMLEqual(
+             asset.render(attrs={"nonce": "abc123"}),
+             '<link href="/path/to/css" nonce="abc123" rel="stylesheet">',
+         )
+ 
+     def test_render_attrs_conflict(self):
+-        asset = CSS("/path/to/css", nonce="static")
+-        msg = "CSS has conflicting attributes: nonce"
++        asset = Stylesheet("/path/to/css", nonce="static")
++        msg = "Stylesheet has conflicting attributes: nonce"
+         with self.assertRaisesMessage(ValueError, msg):
+             asset.render(attrs={"nonce": "dynamic"})
+ 
+@@ -848,7 +860,7 @@ def test_render_js_with_attrs(self):
+         )
+ 
+     def test_render_css_with_attrs(self):
+-        media = Media(css={"all": [CSS("/path/to/css", media="print")]})
++        media = Media(css={"all": [Stylesheet("/path/to/css", media="print")]})
+         self.assertHTMLEqual(
+             media.render(attrs={"nonce": "abc123"}),
+             '<link href="/path/to/css" media="print" nonce="abc123" rel="stylesheet">',
+@@ -868,8 +880,8 @@ def test_render_attrs_conflict(self):
+                 "Script has conflicting attributes: nonce",
+             ),
+             (
+-                Media(css={"all": [CSS("/path/to/css", nonce="static")]}),
+-                "CSS has conflicting attributes: nonce",
++                Media(css={"all": [Stylesheet("/path/to/css", nonce="static")]}),
++                "Stylesheet has conflicting attributes: nonce",
+             ),
+         ]
+         for media, msg in cases:
+@@ -888,8 +900,8 @@ def test_construction(self):
+         m = Media(
+             css={
+                 "all": (
+-                    CSS("path/to/css1", media="all"),
+-                    CSS("/path/to/css2", media="all"),
++                    Stylesheet("path/to/css1", media="all"),
++                    Stylesheet("/path/to/css2", media="all"),
+                 )
+             },
+             js=(
+@@ -913,7 +925,8 @@ def test_construction(self):
+         )
+         self.assertEqual(
+             repr(m),
+-            "Media(css={'all': [CSS('path/to/css1'), CSS('/path/to/css2')]}, "
++            "Media(css={'all': [Stylesheet('path/to/css1'), "
++            "Stylesheet('/path/to/css2')]}, "
+             "js=[Script('/path/to/js1'), Script('http://media.other.com/path/to/js2'), "
+             "Script('https://secure.other.com/path/to/js3')])",
+         )
+@@ -935,7 +948,9 @@ def __str__(self):
+     def test_combine_media(self):
+         class MyWidget1(TextInput):
+             class Media:
+-                css = {"all": (CSS("path/to/css1", media="all"), "/path/to/css2")}
++                css = {
++                    "all": (Stylesheet("path/to/css1", media="all"), "/path/to/css2")
++                }
+                 js = (
+                     "/path/to/js1",
+                     "http://media.other.com/path/to/js2",
+@@ -947,7 +962,9 @@ class Media:
+ 
+         class MyWidget2(TextInput):
+             class Media:
+-                css = {"all": (CSS("/path/to/css2", media="all"), "/path/to/css3")}
++                css = {
++                    "all": (Stylesheet("/path/to/css2", media="all"), "/path/to/css3")
++                }
+                 js = (Script("/path/to/js1"), "/path/to/js4")
+ 
+         w1 = MyWidget1()
+@@ -971,8 +988,8 @@ def test_media_deduplication(self):
+         media = Media(
+             css={
+                 "all": (
+-                    CSS("/path/to/css1", media="all"),
+-                    CSS("/path/to/css1", media="all"),
++                    Stylesheet("/path/to/css1", media="all"),
++                    Stylesheet("/path/to/css1", media="all"),
+                     "/path/to/css1",
+                 )
+             },

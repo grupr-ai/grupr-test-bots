@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15521,
+    "url": "https://github.com/fastapi/fastapi/pull/15521",
+    "title": "\ud83c\udf10 Update translations for ru (update-outdated)",
+    "merged_at": "2026-05-18T08:26:16Z",
+    "diff_loc": 85
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe reviewers are in unanimous agreement that these documentation changes can be shipped. The changes consist of:\n\n1. Removal of a Speakeasy reference\n2. Minor terminology updates (removing redundant term from tooltip)\n3. Addition of structured sponsor sections with proper HTML/CSS\n4. Addition of a new opinions section with tabbed interface\n5. Addition of FastAPI Conf announcement\n6. Minor typo fix (\"askaban\" \u2192 \"azkaban\")\n\nThe Architect confirms the changes maintain good architectural patterns with proper separation of concerns and consistent naming conventions. The Security reviewer confirms there are no security implications as these are purely documentation updates.\n\n**Most important finding**: The new tabbed opinions section (lines 85-118) demonstrates excellent implementation with semantic HTML, proper ARIA attributes, and clear separation of structure, behavior, and presentation - setting a good example for future UI components in the documentation.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nThe changes are primarily documentation updates in Russian translations, focusing on removing references, updating terminology, and adding new sections. The architectural structure remains unchanged - these are content modifications within existing documentation files.\n\nTop 3 findings:\n\n1. **Consistent naming convention maintained** (lines 57-75): The CSS class naming follows BEM-like convention (`fastapi-sponsors__card--keystone`) which maintains good naming structure for styling organization.\n\n2. **Well-structured HTML components** (lines 85-118): The new opinions section uses semantic HTML with proper ARIA attributes and follows a clear tabbed interface pattern, showing good abstraction of UI components.\n\n3. **Proper separation of concerns** (lines 85-118): The tabbed interface implementation separates structure (HTML), behavior (data attributes for JS hooks), and presentation (CSS classes), demonstrating good architectural boundaries."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nThe reviewed changes are limited to documentation updates and do not introduce any new code with potential security concerns. The documentation changes do not impact injection vectors, secrets, authentication, or trust boundaries, and do not raise any OWASP Top 10 issues.\n\nTop 3 findings:\n\n1. **No injection vectors introduced**: The changes are purely in documentation, with no user input or data processing that could introduce injection vulnerabilities. \n\n2. **No secrets or sensitive data exposed**: There are no changes that involve handling or exposing secrets or sensitive information.\n\n3. **No authentication or authorization changes**: There are no changes affecting authentication mechanisms or trust boundaries, ensuring that existing security controls remain intact."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe reviewers are in unanimous agreement that these documentation changes can be shipped. The changes consist of:\n\n1. Removal of a Speakeasy reference\n2. Minor terminology updates (removing redundant term from tooltip)\n3. Addition of structured sponsor sections with proper HTML/CSS\n4. Addition of a new opinions section with tabbed interface\n5. Addition of FastAPI Conf announcement\n6. Minor typo fix (\"askaban\" \u2192 \"azkaban\")\n\nThe Architect confirms the changes maintain good architectural patterns with proper separation of concerns and consistent naming conventions. The Security reviewer confirms there are no security implications as these are purely documentation updates.\n\n**Most important finding**: The new tabbed opinions section (lines 85-118) demonstrates excellent implementation with semantic HTML, proper ARIA attributes, and clear separation of structure, behavior, and presentation - setting a good example for future UI components in the documentation."
+      }
+    ],
+    "elapsed_s": 23,
+    "raw_grupr_id": "e3a96d2d-cb91-4281-8b63-b29020cb312d",
+    "timed_out": false
+  },
+  "panel_wall_s": 23,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. Line 821: Typo correction from `prisoner-of-askaban` to `prisoner-of-azkaban` - fixing misspelling of the Harry Potter book title\n2. Line 33: Removal of Speakeasy from SDK generators list - appears to be removing a commercial sponsor/partner\n3. Lines 43, 69-71, 93-97: Translation refinement removing \"\u0430\u0432\u0442\u043e\u0434\u043e\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0435\" (auto-completion) from the compound term, keeping only \"\u0430\u0432\u0442\u043e\u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0435\" and \"IntelliSense\"\n\n**Notes** (lower-priority observations)\n- Lines 57-85: HTML structure improvements for sponsor display sections, adding proper CSS classes and semantic markup\n- Lines 87-119: New tabbed opinion/testimonials section with better UI/accessibility\n- Lines 150-156: Addition of FastAPI Conf 2026 announcement section\n- Line 159: Minor update to documentary section styling\n- Overall changes improve accessibility with ARIA labels and semantic HTML",
+    "elapsed_s": 19,
+    "input_tokens": 4784,
+    "output_tokens": 251
+  },
+  "single_wall_s": 19,
+  "user_email_var": "GRUPR_TEST_EXTERNAL_DEV_EMAIL",
+  "completed_at": "2026-05-20T01:50:46Z"
+}

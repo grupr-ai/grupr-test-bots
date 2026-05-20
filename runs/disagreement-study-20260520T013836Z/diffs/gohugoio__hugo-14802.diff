@@ -1,0 +1,122 @@
+diff --git a/hugolib/menu_test.go b/hugolib/menu_test.go
+index 20d862caa69..beb1faf6f28 100644
+--- a/hugolib/menu_test.go
++++ b/hugolib/menu_test.go
+@@ -567,7 +567,7 @@ menu: main
+ 
+ 	b.AssertFileContent("public/en/index.html", `<a href="/en/p1/">p1</a><a href="/en/p2/">p2</a>`)
+ 	b.AssertFileContent("public/fr/index.html", `<a href="/fr/p1/">p1</a>`)
+-	b.AssertLogContains("! WARN")
++	b.AssertLogContains("! duplicate menu entry")
+ }
+ 
+ func TestSectionPagesIssue12399(t *testing.T) {
+diff --git a/langs/i18n/translationProvider.go b/langs/i18n/translationProvider.go
+index 11aeaa7818c..5fcaeb3fd29 100644
+--- a/langs/i18n/translationProvider.go
++++ b/langs/i18n/translationProvider.go
+@@ -21,6 +21,7 @@ import (
+ 	"strings"
+ 
+ 	"github.com/gohugoio/hugo/common/paths"
++	"github.com/gohugoio/hugo/config"
+ 	"github.com/gohugoio/hugo/langs"
+ 	"github.com/gohugoio/hugo/parser/metadecoders"
+ 
+@@ -150,17 +151,29 @@ func (tp *TranslationProvider) CloneResource(dst, src *deps.Deps) error {
+ 	return nil
+ }
+ 
++func defaultLanguage(conf config.AllProvider) *langs.Language {
++	key := conf.DefaultContentLanguage()
++	for _, l := range conf.Languages().(langs.Languages) {
++		if l.Lang == key {
++			return l
++		}
++	}
++	return conf.Language().(*langs.Language)
++}
++
+ // getTranslateFunc returns the translation function for the language in Deps.
+-// We first try the locale (e.g. "en-US"), then the language key (e.g. "en").
++// The lookup order is: current locale, current key, default locale, default key.
+ func (tp *TranslationProvider) getTranslateFunc(dst *deps.Deps) func(ctx context.Context, translationID string, templateData any) string {
+-	l := dst.Conf.Language().(*langs.Language)
+-	if locale := l.Locale(); locale != "" {
+-		if fn, ok := tp.t.Lookup(strings.ToLower(locale)); ok {
+-			return fn
++	current := dst.Conf.Language().(*langs.Language)
++	defaultLang := defaultLanguage(dst.Conf)
++	for _, l := range []*langs.Language{current, defaultLang} {
++		for _, key := range []string{strings.ToLower(l.Locale()), l.Lang} {
++			if fn, ok := tp.t.Lookup(key); ok {
++				return fn
++			}
+ 		}
+ 	}
+-	// Func will fall back to the default language if not found.
+-	return tp.t.Func(l.Lang)
++	return tp.t.Func("en")
+ }
+ 
+ func errWithFileContext(inerr error, r *source.File) error {
+diff --git a/langs/languages_integration_test.go b/langs/languages_integration_test.go
+index fbf04d8746a..3bb4bf17138 100644
+--- a/langs/languages_integration_test.go
++++ b/langs/languages_integration_test.go
+@@ -326,3 +326,55 @@ language: {{ site.Language.Name }} file: {{ T "file" }}|
+ 	b.AssertFileContent("public/de/index.html", "language: de file: de|")
+ 	b.AssertFileContent("public/de-de/index.html", "language: de-de file: de-de|")
+ }
++
++func TestDefaultContentLanguageFallback14243(t *testing.T) {
++	t.Parallel()
++
++	files := `
++-- hugo.toml --
++disableKinds = ['page','rss','section','sitemap','taxonomy','term']
++defaultContentLanguage = 'es'
++defaultContentLanguageInSubdir = true
++
++[languages.es]
++locale = 'es-AR'
++weight = 1
++
++[languages.pt]
++locale = 'pt-BR'
++weight = 2
++-- layouts/home.html --
++{{ T "foo"}}|
++-- i18n/es-ar.toml --
++foo = 'foo es-ar'
++-- i18n/es.toml --
++foo = 'foo es'
++-- i18n/pt-br.toml --
++foo = 'foo pt-br'
++-- i18n/pt.toml --
++foo = 'foo pt'
++`
++
++	b := hugolib.Test(t, files)
++	b.AssertFileContent("public/pt/index.html", "foo pt-br|")
++
++	files = strings.ReplaceAll(files, "i18n/pt-br.toml", "unused-a.toml")
++
++	b = hugolib.Test(t, files)
++	b.AssertFileContent("public/pt/index.html", "foo pt|")
++
++	files = strings.ReplaceAll(files, "i18n/pt.toml", "unused-b.toml")
++
++	b = hugolib.Test(t, files)
++	b.AssertFileContent("public/pt/index.html", "foo es-ar|")
++
++	files = strings.ReplaceAll(files, "i18n/es-ar.toml", "unused-c.toml")
++
++	b = hugolib.Test(t, files)
++	b.AssertFileContent("public/pt/index.html", "foo es|")
++
++	files = strings.ReplaceAll(files, "i18n/es.toml", "unused-d.toml")
++
++	b = hugolib.Test(t, files)
++	b.AssertFileContent("public/pt/index.html", "|")
++}

@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15530,
+    "url": "https://github.com/fastapi/fastapi/pull/15530",
+    "title": "\ud83c\udf10 Update translations for ja (update-outdated)",
+    "merged_at": "2026-05-18T15:39:28Z",
+    "diff_loc": 98
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe changes improve documentation structure and presentation with no functional impact. While the Security specialist raised theoretical XSS concerns about template variables like `sponsor.url` and `sponsor.img`, these are static documentation files processed at build time with trusted data, not runtime user input. The Architect correctly identified the improvements in code organization through semantic CSS classes and better component structure.\n\n**Most important issue**: None that blocks shipping. The refactoring improves maintainability through better separation of concerns and consistent naming patterns. The security concerns raised are not applicable to this static documentation context.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Good abstraction of sponsor presentation structure** (lines 57-77): The refactoring from inline styles to semantic CSS classes (`fastapi-sponsors`, `fastapi-sponsors__card`, `fastapi-sponsors__banner`) creates a cleaner separation between content and presentation. This improves maintainability and follows proper web component naming conventions.\n\n2. **Well-structured testimonial component** (lines 85-119): The new tabbed testimonial interface introduces a proper component structure with clear separation of concerns - tabs for navigation and panels for content. The use of ARIA attributes and semantic HTML demonstrates good accessibility-aware design.\n\n3. **Consistent naming pattern for feature banners** (lines 150, 156): The introduction of `fastapi-feature-banner` class for conference and documentary links establishes a reusable abstraction for similar promotional content, following the established naming pattern from the sponsors section."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Potential for Cross-Site Scripting (XSS) Vulnerabilities** - The use of user-supplied data in HTML attributes without proper sanitization can lead to XSS attacks. Specifically, the `sponsor.url` and `sponsor.img` values are directly injected into the HTML (lines 57-77). Although this is in a markdown file, any dynamic content should be carefully validated or sanitized to avoid OWASP Top 10 - A7:2017 Cross-Site Scripting (XSS).\n\n2. **Lack of Input Validation** - While the content changes are primarily documentation and HTML, any part of the application that processes user input or external data should ensure that all inputs are validated and sanitized. This is in line with OWASP Top 10 - A5:2021 Security Misconfiguration. Although not explicitly shown in the current diff, it's crucial to be aware of these vectors.\n\n3. **Absence of Security Headers** - While not directly related to the content of this diff, ensuring that all web assets served (especially those including external references like images or scripts) have appropriate security headers is vital. This includes Content Security Policy (CSP) headers to mitigate injection attacks, which aligns with OWASP Top 10 - A6:2017 Security Misconfiguration. This is a broader concern but relevant given the use of external URLs and images."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe changes improve documentation structure and presentation with no functional impact. While the Security specialist raised theoretical XSS concerns about template variables like `sponsor.url` and `sponsor.img`, these are static documentation files processed at build time with trusted data, not runtime user input. The Architect correctly identified the improvements in code organization through semantic CSS classes and better component structure.\n\n**Most important issue**: None that blocks shipping. The refactoring improves maintainability through better separation of concerns and consistent naming patterns. The security concerns raised are not applicable to this static documentation context."
+      }
+    ],
+    "elapsed_s": 27,
+    "raw_grupr_id": "f7cec6fc-26c2-43c5-9611-657a81b37c66",
+    "timed_out": false
+  },
+  "panel_wall_s": 27,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. Lines 33: Removed Speakeasy sponsor link - This appears intentional as other sponsors are reformatted, suggesting Speakeasy is no longer a sponsor\n2. Lines 57-76: Major HTML/CSS refactor for sponsor display - Changed from inline styles to proper CSS classes, improving maintainability and accessibility\n3. Lines 86-122: Added interactive tabs for company testimonials - New UI component with proper ARIA labels and accessibility support\n\n**Notes** (lower-priority observations)\n\n- Lines 195-196: Changed \"note\" directive from \"info\" to match documentation standards\n- Lines 803-821: Fixed typo in directory name (\"prisoner-of-askaban\" \u2192 \"prisoner-of-azkaban\")\n- Line 559: Improved Japanese comment translation (\"Don't run this now\" \u2192 \"\u4eca\u306f\u5b9f\u884c\u3057\u306a\u3044\u3067\u304f\u3060\u3055\u3044\")\n- All changes appear to be improvements to documentation quality, accessibility, and accuracy",
+    "elapsed_s": 16,
+    "input_tokens": 5095,
+    "output_tokens": 236
+  },
+  "single_wall_s": 16,
+  "user_email_var": "GRUPR_TEST_NEW_USER_EMAIL",
+  "completed_at": "2026-05-20T01:53:37Z"
+}

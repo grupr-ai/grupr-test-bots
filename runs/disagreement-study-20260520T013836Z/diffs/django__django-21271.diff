@@ -1,0 +1,122 @@
+diff --git a/django/contrib/admin/locale/en/LC_MESSAGES/djangojs.po b/django/contrib/admin/locale/en/LC_MESSAGES/djangojs.po
+index 8fdbb77626bc..921a73f44bd3 100644
+--- a/django/contrib/admin/locale/en/LC_MESSAGES/djangojs.po
++++ b/django/contrib/admin/locale/en/LC_MESSAGES/djangojs.po
+@@ -5,7 +5,7 @@ msgstr ""
+ "Project-Id-Version: Django\n"
+ "Report-Msgid-Bugs-To: \n"
+ "POT-Creation-Date: 2025-03-25 15:04-0500\n"
+-"PO-Revision-Date: 2010-05-13 15:35+0200\n"
++"PO-Revision-Date: 2026-05-11 15:27-0400\n"
+ "Last-Translator: Django team\n"
+ "Language-Team: English <en@li.org>\n"
+ "Language: en\n"
+@@ -103,7 +103,7 @@ msgstr ""
+ #: contrib/admin/static/admin/js/actions.js:175
+ msgid ""
+ "You have selected an action, and you haven’t made any changes on individual "
+-"fields. You’re probably looking for the Go button rather than the Save "
++"fields. You’re probably looking for the Run button rather than the Save "
+ "button."
+ msgstr ""
+ 
+diff --git a/django/contrib/admin/static/admin/js/actions.js b/django/contrib/admin/static/admin/js/actions.js
+index e302bb4b222c..879a46d8be40 100644
+--- a/django/contrib/admin/static/admin/js/actions.js
++++ b/django/contrib/admin/static/admin/js/actions.js
+@@ -211,7 +211,7 @@
+                               "You have selected an action, but you haven’t saved your changes to individual fields yet. Please click OK to save. You’ll need to re-run the action.",
+                           )
+                         : gettext(
+-                              "You have selected an action, and you haven’t made any changes on individual fields. You’re probably looking for the Go button rather than the Save button.",
++                              "You have selected an action, and you haven’t made any changes on individual fields. You’re probably looking for the Run button rather than the Save button.",
+                           );
+                     if (!confirm(text)) {
+                         event.preventDefault();
+diff --git a/docs/releases/6.0.6.txt b/docs/releases/6.0.6.txt
+index 20501cddc4e4..9a7bd4e8b56c 100644
+--- a/docs/releases/6.0.6.txt
++++ b/docs/releases/6.0.6.txt
+@@ -9,4 +9,6 @@ Django 6.0.6 fixes several bugs in 6.0.5.
+ Bugfixes
+ ========
+ 
+-* ...
++* Fixed a bug in Django 6.0 where an alert message on an admin changelist with
++  ``ModelAdmin.list_editable`` referred to the "Run" button by its previous
++  name (:ticket:`37094`).
+diff --git a/tests/admin_changelist/tests.py b/tests/admin_changelist/tests.py
+index ef0f8a0570ed..ba1f5d179365 100644
+--- a/tests/admin_changelist/tests.py
++++ b/tests/admin_changelist/tests.py
+@@ -2102,7 +2102,7 @@ def test_save_without_changes_warns_on_pending_action(self):
+                 alert.text,
+                 "You have selected an action, and you haven’t made any "
+                 "changes on individual fields. You’re probably looking for "
+-                "the Go button rather than the Save button.",
++                "the Run button rather than the Save button.",
+             )
+         finally:
+             alert.dismiss()
+diff --git a/tests/admin_views/test_actions.py b/tests/admin_views/test_actions.py
+index de5f5462a344..b29e66ce0a15 100644
+--- a/tests/admin_views/test_actions.py
++++ b/tests/admin_views/test_actions.py
+@@ -362,7 +362,7 @@ def test_multiple_actions_form(self):
+             ACTION_CHECKBOX_NAME: [self.s1.pk],
+             # Two different actions selected on the two forms...
+             "action": ["external_mail", "delete_selected"],
+-            # ...but "go" was clicked on the top form.
++            # ...but "Run" was clicked on the top form.
+             "index": 0,
+         }
+         self.client.post(
+@@ -385,7 +385,7 @@ def test_media_from_actions_form(self):
+ 
+     def test_user_message_on_none_selected(self):
+         """
+-        User sees a warning when 'Go' is pressed and no items are selected.
++        User sees a warning when 'Run' is pressed and no items are selected.
+         """
+         action_data = {
+             ACTION_CHECKBOX_NAME: [],
+@@ -405,7 +405,7 @@ def test_user_message_on_none_selected(self):
+ 
+     def test_user_message_on_no_action(self):
+         """
+-        User sees a warning when 'Go' is pressed and no action is selected.
++        User sees a warning when 'Run' is pressed and no action is selected.
+         """
+         action_data = {
+             ACTION_CHECKBOX_NAME: [self.s1.pk, self.s2.pk],
+diff --git a/tests/admin_views/tests.py b/tests/admin_views/tests.py
+index a1251103aad8..e61d3d3159ea 100644
+--- a/tests/admin_views/tests.py
++++ b/tests/admin_views/tests.py
+@@ -4867,7 +4867,7 @@ def test_non_form_errors(self):
+             "form-0-alive": "1",
+             "form-0-gender": "2",
+             # The form processing understands this as a list_editable "Save"
+-            # and not an action "Go".
++            # and not an action "Run".
+             "_save": "Save",
+         }
+         response = self.client.post(
+@@ -4922,7 +4922,7 @@ def test_list_editable_ordering(self):
+             "form-3-id": "4",
+             "form-3-collector": "1",
+             # The form processing understands this as a list_editable "Save"
+-            # and not an action "Go".
++            # and not an action "Run".
+             "_save": "Save",
+         }
+         response = self.client.post(
+@@ -4958,7 +4958,7 @@ def test_list_editable_pagination(self):
+         self.assertContains(response, "Unordered object #1")
+ 
+     def test_list_editable_action_submit(self):
+-        # List editable changes should not be executed if the action "Go"
++        # List editable changes should not be executed if the action "Run"
+         # button is used to submit the form.
+         data = {
+             "form-TOTAL_FORMS": "3",

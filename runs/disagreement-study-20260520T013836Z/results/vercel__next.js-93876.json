@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93876,
+    "url": "https://github.com/vercel/next.js/pull/93876",
+    "title": "turbo-tasks: prioritize recomputed tasks with Recomputation priority",
+    "merged_at": "2026-05-17T19:36:08Z",
+    "diff_loc": 44
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\nThe specialists agree on critical issues with the priority handling logic that must be fixed before merging:\n\n**Must-fix issues:**\n1. **Inverted priority logic** (lines 227-237): Both reviewers identified that the condition for updating task priority appears backwards. The comment states \"Update the priority to be the lower one\" but the logic checks if current priority is Initial OR greater than parent, which contradicts the intent. This could cause incorrect task scheduling behavior.\n\n2. **Missing abstraction for priority resolution**: The Architect correctly notes that complex priority inheritance logic is duplicated across match arms. This should be extracted into a dedicated method to ensure consistent behavior and prevent bugs.\n\n**Should-fix issues:**\n1. **Documentation for new TaskPriority variant**: Both reviewers note that `TaskPriority::Recomputation` lacks documentation explaining its purpose and ordering relative to other priorities. This is essential for maintainability.\n\nThe security concerns about potential injection vectors are noted but appear to be general warnings rather than specific vulnerabilities in this code change.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Inconsistent priority handling logic** (lines 227-237): The condition `if matches!(*current_priority, TaskPriority::Initial) || *current_priority > parent_priority` appears to have inverted logic. The comment says \"Update the priority to be the lower one\" but the condition checks if current is Initial OR greater than parent. This seems backwards - it should update when current priority is lower (higher precedence) than parent priority.\n\n2. **Missing abstraction for priority resolution** (lines 227-255): The priority resolution logic is duplicated across multiple match arms with subtle variations. This complex priority inheritance/override logic should be extracted into a dedicated method like `resolve_task_priority(current: Option<TaskPriority>, parent: TaskPriority) -> TaskPriority` to ensure consistent behavior and make the rules explicit.\n\n3. **Unclear naming and missing documentation** (lines 448-449): The new `TaskPriority::Recomputation` variant lacks documentation explaining its purpose and ordering relative to other priorities. The name doesn't clearly convey whether this is higher or lower priority than Initial/Invalidation variants. Consider renaming to something like `RecomputationLowPriority` or adding clear documentation about the priority ordering."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Potential Injection Vector** (No specific line reference): There is a general risk of injection attacks if any of the task descriptions or priorities are influenced by external inputs. It is crucial to ensure that any inputs affecting task execution or prioritization are properly sanitized and validated. This relates to the OWASP category of Injection.\n\n2. **Inconsistent priority handling logic** (lines 227-237): The conditional logic for updating the task priority seems inverted, which could lead to incorrect task scheduling and execution order. This inconsistency can cause unexpected behavior across trust boundaries, which is critical for maintaining application integrity. This falls under the OWASP category of Broken Access Control.\n\n3. **Missing documentation for task priorities** (lines 448-449): The introduction of `TaskPriority::Recomputation` lacks detailed documentation, which is crucial for developers to understand its impact on task scheduling and execution. Clear documentation is essential to prevent misconfigurations that can lead to security missteps or broken functionality. This is related to the OWASP category of Security Misconfiguration."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\nThe specialists agree on critical issues with the priority handling logic that must be fixed before merging:\n\n**Must-fix issues:**\n1. **Inverted priority logic** (lines 227-237): Both reviewers identified that the condition for updating task priority appears backwards. The comment states \"Update the priority to be the lower one\" but the logic checks if current priority is Initial OR greater than parent, which contradicts the intent. This could cause incorrect task scheduling behavior.\n\n2. **Missing abstraction for priority resolution**: The Architect correctly notes that complex priority inheritance logic is duplicated across match arms. This should be extracted into a dedicated method to ensure consistent behavior and prevent bugs.\n\n**Should-fix issues:**\n1. **Documentation for new TaskPriority variant**: Both reviewers note that `TaskPriority::Recomputation` lacks documentation explaining its purpose and ordering relative to other priorities. This is essential for maintainability.\n\nThe security concerns about potential injection vectors are noted but appear to be general warnings rather than specific vulnerabilities in this code change."
+      }
+    ],
+    "elapsed_s": 27,
+    "raw_grupr_id": "2f43e3a6-3a4c-4b16-ac8f-74c70bc7037f",
+    "timed_out": false
+  },
+  "panel_wall_s": 27,
+  "single_model": {
+    "verdict": "ship-with-changes",
+    "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings** (with line refs from the diff)\n\n1. **Line 761, 899**: The change from `TaskPriority::Initial` to `TaskPriority::Recomputation` for tasks that don't have output/cell content available could lead to starvation of initial tasks if there are many recomputations happening. This needs careful consideration of the scheduling implications.\n\n2. **Lines 227-236**: The logic for resetting priority from `Recomputation` to `Initial` during invalidation is good for preventing viral recomputation spread, but the comment could be clearer about why this prevents ordering issues.\n\n3. **Line 248**: The condition `matches!(*current_priority, TaskPriority::Initial) || *current_priority > parent_priority` changes the priority update logic in a way that might not be immediately obvious. The `matches!` check seems redundant since `Initial` is the lowest priority anyway.\n\n**Notes** (lower-priority observations)\n\n- The `Recomputation` priority variant is added but there's no explicit ordering defined relative to `Initial` and `Invalidation` priorities in the `Ord` implementation\n- Line 31: Good cleanup removing the unused `Local` variant from `TaskExecutionReason`\n- The comments added to `TaskExecutionReason` variants improve code documentation",
+    "elapsed_s": 18,
+    "input_tokens": 2279,
+    "output_tokens": 313
+  },
+  "single_wall_s": 18,
+  "user_email_var": "GRUPR_TEST_POWER_USER_EMAIL",
+  "completed_at": "2026-05-20T02:02:33Z"
+}

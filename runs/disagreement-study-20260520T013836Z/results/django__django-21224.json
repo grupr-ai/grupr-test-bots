@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "django/django",
+    "pr_number": 21224,
+    "url": "https://github.com/django/django/pull/21224",
+    "title": "Removed hardcoded pks in annotations and delete_regress tests.",
+    "merged_at": "2026-05-04T12:44:23Z",
+    "diff_loc": 50
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe code changes improve test isolation by removing hardcoded IDs and using dynamically assigned primary keys. While the Security reviewer raised a SQL injection concern, the code actually demonstrates proper parameterization (`WHERE id = %s`, [book.pk]). The transaction management concern is also addressed - the code uses `transaction.atomic()` context managers that handle rollback automatically.\n\n**Most important issue**: None identified. The changes are beneficial improvements that make tests more resilient and maintainable without introducing any security vulnerabilities.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\n**Top 3 Findings:**\n\n1. **Improved test isolation** (lines 745, 753, 803, 811): Replacing hardcoded IDs with dynamically assigned primary keys (`e1.pk`, `e2.pk`) removes coupling to database implementation details and makes tests more resilient to ID generation changes.\n\n2. **Consistent naming pattern** (lines 745, 753, 803, 811): The variable names `e1` and `e2` follow a clear, consistent pattern that makes the test code more readable while maintaining the same semantic meaning as the original hardcoded IDs.\n\n3. **Better abstraction in concurrent delete test** (lines 61-62, 71-72): Using `book.pk` instead of hardcoded ID in the SQL query properly abstracts the database-specific detail and makes the test focus on the concurrent delete behavior rather than specific ID values."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 Findings:**\n\n1. **SQL Injection Risk** (lines 71-72): Directly executing SQL queries with user input without proper parameterization can lead to SQL injection vulnerabilities. Ensure that all inputs are parameterized to prevent injection attacks. Although the current code uses parameterization (`WHERE id = %s`), it's crucial to enforce this across all SQL executions. [OWASP A03:2021 - Injection]\n\n2. **Use of Hardcoded IDs in Past Code** (lines 58-62): Although the hardcoded IDs have been removed, it is important to ensure that any test data or configurations do not rely on static identifiers that might expose potential security risks or collisions in different test environments. [OWASP A05:2021 - Security Misconfiguration]\n\n3. **Lack of Transaction Rollback for Test Isolation** (lines 58-76): Ensure that tests are isolated and any database changes are rolled back after each test to prevent side effects that could affect other tests. This is more of a best practice to maintain test integrity rather than a direct security vulnerability. [OWASP A06:2021 - Vulnerable and Outdated Components] \n\nMake sure to review and enforce secure coding practices across the codebase, particularly with database operations, to prevent injection vulnerabilities."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe code changes improve test isolation by removing hardcoded IDs and using dynamically assigned primary keys. While the Security reviewer raised a SQL injection concern, the code actually demonstrates proper parameterization (`WHERE id = %s`, [book.pk]). The transaction management concern is also addressed - the code uses `transaction.atomic()` context managers that handle rollback automatically.\n\n**Most important issue**: None identified. The changes are beneficial improvements that make tests more resilient and maintainable without introducing any security vulnerabilities."
+      }
+    ],
+    "elapsed_s": 23,
+    "raw_grupr_id": "02c71faa-1665-471e-bebb-094f81405cc3",
+    "timed_out": false
+  },
+  "panel_wall_s": 23,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Properly removes hardcoded IDs** (lines 745-746, 753-754, 803-804, 812-813): The changes correctly replace hardcoded `id=1` and `id=2` with auto-generated primary keys, making tests more robust and database-agnostic.\n\n2. **Correctly updates assertions to use `.pk`** (lines 771, 775, 829, 833): All test assertions are properly updated to use `e1.pk` and `e2.pk` instead of hardcoded values, maintaining test correctness.\n\n3. **SQL query parameterization** (lines 71-72): The raw SQL query in `test_concurrent_delete` is properly parameterized using placeholders instead of string interpolation, which is the correct approach for database queries.\n\n**Notes** (lower-priority observations)\n\n- The formatting changes in the `rows` list definitions (lines 775-783, 833-841) make the code slightly less readable due to increased vertical space, but this is a minor style issue.\n- The variable name `book` in line 62 could be more descriptive (e.g., `book_to_delete`), but it's clear enough in context.\n- The test logic and assertions remain unchanged, ensuring the tests continue to validate the same behavior.",
+    "elapsed_s": 18,
+    "input_tokens": 1426,
+    "output_tokens": 325
+  },
+  "single_wall_s": 18,
+  "user_email_var": "GRUPR_TEST_CONV_C_EMAIL",
+  "completed_at": "2026-05-20T01:46:33Z"
+}

@@ -1,0 +1,178 @@
+diff --git a/ext/node/polyfills/v8.ts b/ext/node/polyfills/v8.ts
+index 6f94eb3d02931a..79eb7e293f94df 100644
+--- a/ext/node/polyfills/v8.ts
++++ b/ext/node/polyfills/v8.ts
+@@ -8,7 +8,13 @@
+ 
+ (function () {
+ const { core, primordials } = globalThis.__bootstrap;
+-const { ObjectPrototypeToString, SymbolDispose, SymbolSpecies } = primordials;
++const {
++  ArrayPrototypePush,
++  ObjectFreeze,
++  ObjectPrototypeToString,
++  SymbolDispose,
++  SymbolSpecies,
++} = primordials;
+ const {
+   op_v8_cached_data_version_tag,
+   op_v8_get_heap_code_statistics,
+@@ -439,6 +445,62 @@ class GCProfiler {
+   }
+ }
+ 
++// https://nodejs.org/api/v8.html#startup-snapshot-api
++//
++// Deno does not ship `--build-snapshot` / `--snapshot-blob` for users, so this
++// is an API-surface polyfill that lets modules calling `v8.startupSnapshot`
++// load without errors. `isBuildingSnapshot()` always returns false. The
++// serialize/deserialize callbacks are stored but never invoked because there
++// is no snapshot lifecycle. `setDeserializeMainFunction` invokes the callback
++// synchronously so scripts that register a deserialize main still run their
++// entry point in plain Deno runs.
++// deno-lint-ignore no-explicit-any
++type SnapshotCallback = (data: any) => unknown;
++const serializeCallbacks: { fn: SnapshotCallback; data: unknown }[] = [];
++const deserializeCallbacks: { fn: SnapshotCallback; data: unknown }[] = [];
++let deserializeMainCalled = false;
++
++function startupSnapshotSetDeserializeMainFunction(
++  fn: SnapshotCallback,
++  data?: unknown,
++) {
++  validateFunction(fn, "callback");
++  if (deserializeMainCalled) {
++    throw new Error(
++      "v8.startupSnapshot.setDeserializeMainFunction() can only be called once.",
++    );
++  }
++  deserializeMainCalled = true;
++  fn(data);
++}
++
++function startupSnapshotAddSerializeCallback(
++  fn: SnapshotCallback,
++  data?: unknown,
++) {
++  validateFunction(fn, "callback");
++  ArrayPrototypePush(serializeCallbacks, { fn, data });
++}
++
++function startupSnapshotAddDeserializeCallback(
++  fn: SnapshotCallback,
++  data?: unknown,
++) {
++  validateFunction(fn, "callback");
++  ArrayPrototypePush(deserializeCallbacks, { fn, data });
++}
++
++function startupSnapshotIsBuildingSnapshot() {
++  return false;
++}
++
++const startupSnapshot = ObjectFreeze({
++  setDeserializeMainFunction: startupSnapshotSetDeserializeMainFunction,
++  addSerializeCallback: startupSnapshotAddSerializeCallback,
++  addDeserializeCallback: startupSnapshotAddDeserializeCallback,
++  isBuildingSnapshot: startupSnapshotIsBuildingSnapshot,
++});
++
+ class DefaultDeserializer extends Deserializer {
+   constructor(buffer: ArrayBufferView) {
+     super(buffer);
+@@ -481,6 +543,7 @@ return {
+   getHeapStatistics,
+   queryObjects,
+   setFlagsFromString,
++  startupSnapshot,
+   stopCoverage,
+   takeCoverage,
+   writeHeapSnapshot,
+diff --git a/ext/node/polyfills/v8_esm.ts b/ext/node/polyfills/v8_esm.ts
+index fd90f488022368..991725685eef1b 100644
+--- a/ext/node/polyfills/v8_esm.ts
++++ b/ext/node/polyfills/v8_esm.ts
+@@ -10,6 +10,7 @@ export const {
+   getHeapStatistics,
+   queryObjects,
+   setFlagsFromString,
++  startupSnapshot,
+   stopCoverage,
+   takeCoverage,
+   writeHeapSnapshot,
+diff --git a/tests/node_compat/config.jsonc b/tests/node_compat/config.jsonc
+index 56d248b078ba18..e5306ec4e2058b 100644
+--- a/tests/node_compat/config.jsonc
++++ b/tests/node_compat/config.jsonc
+@@ -3159,6 +3159,10 @@
+       "ignore": true,
+       "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
+     },
++    "parallel/test-snapshot-console.js": {
++      "ignore": true,
++      "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
++    },
+     "parallel/test-snapshot-cwd.js": {
+       "ignore": true,
+       "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
+@@ -3207,6 +3211,10 @@
+       "ignore": true,
+       "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
+     },
++    "parallel/test-snapshot-stack-trace-limit.js": {
++      "ignore": true,
++      "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
++    },
+     "parallel/test-snapshot-typescript.js": {
+       "ignore": true,
+       "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
+@@ -3227,7 +3235,6 @@
+       "ignore": true,
+       "reason": "Node.js snapshot/heap profiling features (--build-snapshot, --heap-prof, --heapsnapshot-near-heap-limit) are not implemented in Deno"
+     },
+-    // "parallel/test-snapshot-console.js": {},
+     // "parallel/test-snapshot-coverage.js": {},
+     "parallel/test-socket-address.js": {},
+     "parallel/test-socketaddress.js": {},
+diff --git a/tests/unit_node/v8_test.ts b/tests/unit_node/v8_test.ts
+index 64f8fdedffde3a..38323a063960b0 100644
+--- a/tests/unit_node/v8_test.ts
++++ b/tests/unit_node/v8_test.ts
+@@ -125,3 +125,37 @@ Deno.test({
+     });
+   },
+ });
++
++Deno.test({
++  name: "startupSnapshot exposes the documented API surface",
++  fn() {
++    assertEquals(typeof v8.startupSnapshot, "object");
++    assertEquals(
++      typeof v8.startupSnapshot.setDeserializeMainFunction,
++      "function",
++    );
++    assertEquals(typeof v8.startupSnapshot.addSerializeCallback, "function");
++    assertEquals(typeof v8.startupSnapshot.addDeserializeCallback, "function");
++    assertEquals(typeof v8.startupSnapshot.isBuildingSnapshot, "function");
++    assertEquals(v8.startupSnapshot.isBuildingSnapshot(), false);
++  },
++});
++
++Deno.test({
++  name:
++    "startupSnapshot.addSerializeCallback and addDeserializeCallback accept callables",
++  fn() {
++    // Storing callbacks must not throw; Deno has no snapshot lifecycle so the
++    // callbacks are never invoked.
++    v8.startupSnapshot.addSerializeCallback(() => {});
++    v8.startupSnapshot.addDeserializeCallback(() => {});
++    assertThrows(() => {
++      // @ts-expect-error testing invalid input
++      v8.startupSnapshot.addSerializeCallback("not a function");
++    });
++    assertThrows(() => {
++      // @ts-expect-error testing invalid input
++      v8.startupSnapshot.addDeserializeCallback(123);
++    });
++  },
++});

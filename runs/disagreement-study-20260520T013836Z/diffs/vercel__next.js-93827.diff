@@ -1,0 +1,193 @@
+diff --git a/packages/next/src/build/templates/app-page.ts b/packages/next/src/build/templates/app-page.ts
+index 6fc58f71b53f..c4ea7aa8c9df 100644
+--- a/packages/next/src/build/templates/app-page.ts
++++ b/packages/next/src/build/templates/app-page.ts
+@@ -1922,14 +1922,29 @@ export async function handler(
+       const transformer = new TransformStream<Uint8Array, Uint8Array>()
+       body.push(transformer.readable)
+ 
++      // Plumb fallback params via request meta so the RequestStore created
++      // downstream in app-render.tsx knows which params to defer during the
++      // resume. We don't pass them as `fallbackRouteParams` because that
++      // would replace actual param values with opaque placeholders during
++      // segment resolution; the resolved values are baked into the URL and
++      // already interpolated into the postponed state.
++      if (nextConfig.cacheComponents && prerenderInfo?.fallbackRouteParams) {
++        const fallbackParams = createOpaqueFallbackRouteParams(
++          prerenderInfo.fallbackRouteParams
++        )
++        if (fallbackParams) {
++          addRequestMeta(req, 'fallbackParams', fallbackParams)
++        }
++      }
++
+       // Perform the render again, but this time, provide the postponed state.
+       // We don't await because we want the result to start streaming now, and
+       // we've already chained the transformer's readable to the render result.
+       doRender({
+         span,
+         postponed: cachedData.postponed,
+-        // This is a resume render, not a fallback render, so we don't need to
+-        // set this.
++        // This is a resume render, not a fallback render. Fallback params
++        // (for cacheComponents routes) are plumbed via request meta above.
+         fallbackRouteParams: null,
+         forceStaticRender: false,
+       })
+diff --git a/packages/next/src/server/app-render/app-render.tsx b/packages/next/src/server/app-render/app-render.tsx
+index 047691cafd3c..4a871864592e 100644
+--- a/packages/next/src/server/app-render/app-render.tsx
++++ b/packages/next/src/server/app-render/app-render.tsx
+@@ -3694,6 +3694,12 @@ async function renderToStream(
+ 
+           requestStore.stale = INFINITE_CACHE
+           requestStore.stagedRendering = stageController
++          requestStore.asyncApiPromises = createAsyncApiPromises(
++            stageController,
++            requestStore.cookies,
++            requestStore.mutableCookies,
++            requestStore.headers
++          )
+           requestStore.varyParamsAccumulator =
+             createResponseVaryParamsAccumulator()
+ 
+@@ -3823,6 +3829,12 @@ async function renderToStream(
+ 
+           requestStore.stale = INFINITE_CACHE
+           requestStore.stagedRendering = stageController
++          requestStore.asyncApiPromises = createAsyncApiPromises(
++            stageController,
++            requestStore.cookies,
++            requestStore.mutableCookies,
++            requestStore.headers
++          )
+           requestStore.varyParamsAccumulator =
+             createResponseVaryParamsAccumulator()
+ 
+diff --git a/test/e2e/app-dir/segment-cache/cached-navigations/app/partially-static/page.tsx b/test/e2e/app-dir/segment-cache/cached-navigations/app/partially-static/page.tsx
+index 5b3ee74bace7..b081d9a955c3 100644
+--- a/test/e2e/app-dir/segment-cache/cached-navigations/app/partially-static/page.tsx
++++ b/test/e2e/app-dir/segment-cache/cached-navigations/app/partially-static/page.tsx
+@@ -1,7 +1,6 @@
+ import { cacheLife } from 'next/cache'
+ import { cookies, headers } from 'next/headers'
+ import { connection } from 'next/server'
+-import { setTimeout } from 'timers/promises'
+ import { Suspense } from 'react'
+ 
+ export default async function Page({
+@@ -48,7 +47,6 @@ async function SearchParamsContent({
+   searchParams: Promise<{ q?: string }>
+ }) {
+   const { q } = await searchParams
+-  await setTimeout(300)
+   return (
+     <p>
+       Search params: {q ?? 'none'} ({new Date().toISOString()})
+@@ -60,7 +58,6 @@ async function CookiesContent() {
+   const cookieStore = await cookies()
+   const value = cookieStore.get('testCookie')?.value ?? 'none'
+   const date = await getShortLivedCachedDate()
+-  await setTimeout(300)
+   return (
+     <p>
+       Cookie: {value}, Cached at: {date}
+@@ -77,7 +74,6 @@ async function getShortLivedCachedDate() {
+ async function HeadersContent() {
+   const headerStore = await headers()
+   const value = headerStore.get('x-test-header') ?? 'none'
+-  await setTimeout(300)
+   return (
+     <p>
+       Header: {value} ({new Date().toISOString()})
+@@ -87,6 +83,5 @@ async function HeadersContent() {
+ 
+ async function ConnectionContent() {
+   await connection()
+-  await setTimeout(600)
+   return <p>Dynamic content ({new Date().toISOString()})</p>
+ }
+diff --git a/test/e2e/app-dir/segment-cache/cached-navigations/app/runtime-prefetchable/page.tsx b/test/e2e/app-dir/segment-cache/cached-navigations/app/runtime-prefetchable/page.tsx
+index ea3f2ca89088..531291f0c4c1 100644
+--- a/test/e2e/app-dir/segment-cache/cached-navigations/app/runtime-prefetchable/page.tsx
++++ b/test/e2e/app-dir/segment-cache/cached-navigations/app/runtime-prefetchable/page.tsx
+@@ -1,7 +1,6 @@
+ import { cacheLife } from 'next/cache'
+ import { cookies, headers } from 'next/headers'
+ import { connection } from 'next/server'
+-import { setTimeout } from 'timers/promises'
+ import { Suspense } from 'react'
+ 
+ export const unstable_instant = {
+@@ -61,7 +60,6 @@ async function SearchParamsContent({
+   'use cache: private'
+   cacheLife({ stale: 30 })
+   const { q } = await searchParams
+-  await setTimeout(300)
+   return (
+     <p>
+       Search params: {q ?? 'none'} ({new Date().toISOString()})
+@@ -74,7 +72,6 @@ async function CookiesContent() {
+   cacheLife({ stale: 30 })
+   const cookieStore = await cookies()
+   const value = cookieStore.get('testCookie')?.value ?? 'none'
+-  await setTimeout(300)
+   return (
+     <p>
+       Cookie: {value} ({new Date().toISOString()})
+@@ -87,7 +84,6 @@ async function HeadersContent() {
+   cacheLife({ stale: 30 })
+   const headerStore = await headers()
+   const value = headerStore.get('x-test-header') ?? 'none'
+-  await setTimeout(300)
+   return (
+     <p>
+       Header: {value} ({new Date().toISOString()})
+@@ -97,6 +93,5 @@ async function HeadersContent() {
+ 
+ async function ConnectionContent() {
+   await connection()
+-  await setTimeout(600)
+   return <p>Dynamic content ({new Date().toISOString()})</p>
+ }
+diff --git a/test/e2e/app-dir/segment-cache/cached-navigations/app/with-fallback-params/[slug]/page.tsx b/test/e2e/app-dir/segment-cache/cached-navigations/app/with-fallback-params/[slug]/page.tsx
+index a48d8d237125..ab5b45599eab 100644
+--- a/test/e2e/app-dir/segment-cache/cached-navigations/app/with-fallback-params/[slug]/page.tsx
++++ b/test/e2e/app-dir/segment-cache/cached-navigations/app/with-fallback-params/[slug]/page.tsx
+@@ -1,6 +1,5 @@
+ import { cacheLife } from 'next/cache'
+ import { connection } from 'next/server'
+-import { setTimeout } from 'timers/promises'
+ import { Suspense } from 'react'
+ 
+ export default function Page({
+@@ -40,12 +39,10 @@ async function ParamsContent({
+   // await is deferred to the runtime stage, so this content won't appear
+   // in the static stage.
+   const { slug } = await params
+-  await setTimeout(300)
+   return <p>Param: {slug}</p>
+ }
+ 
+ async function ConnectionContent() {
+   await connection()
+-  await setTimeout(600)
+   return <p>Dynamic content ({new Date().toISOString()})</p>
+ }
+diff --git a/test/e2e/app-dir/segment-cache/cached-navigations/app/with-static-params/[slug]/page.tsx b/test/e2e/app-dir/segment-cache/cached-navigations/app/with-static-params/[slug]/page.tsx
+index f9fd1ae90bf1..6637f982b641 100644
+--- a/test/e2e/app-dir/segment-cache/cached-navigations/app/with-static-params/[slug]/page.tsx
++++ b/test/e2e/app-dir/segment-cache/cached-navigations/app/with-static-params/[slug]/page.tsx
+@@ -1,5 +1,4 @@
+ import { connection } from 'next/server'
+-import { setTimeout } from 'timers/promises'
+ import { Suspense } from 'react'
+ 
+ export async function generateStaticParams() {
+@@ -34,6 +33,5 @@ async function CachedContent() {
+ 
+ async function ConnectionContent() {
+   await connection()
+-  await setTimeout(600)
+   return <p>Dynamic content ({new Date().toISOString()})</p>
+ }

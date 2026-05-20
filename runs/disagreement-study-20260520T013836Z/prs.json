@@ -1,0 +1,242 @@
+[
+  {
+    "repo": "denoland/deno",
+    "pr_number": 34129,
+    "url": "https://github.com/denoland/deno/pull/34129",
+    "title": "fix(tests/node_compat): normalize underscored V8 flags",
+    "merged_at": "2026-05-16T18:25:44Z",
+    "diff_loc": 24
+  },
+  {
+    "repo": "denoland/deno",
+    "pr_number": 34142,
+    "url": "https://github.com/denoland/deno/pull/34142",
+    "title": "fix(node): weakly track util.aborted resources",
+    "merged_at": "2026-05-17T07:31:38Z",
+    "diff_loc": 82
+  },
+  {
+    "repo": "denoland/deno",
+    "pr_number": 34189,
+    "url": "https://github.com/denoland/deno/pull/34189",
+    "title": "fix(ext/node): add v8.startupSnapshot API polyfill",
+    "merged_at": "2026-05-17T13:50:43Z",
+    "diff_loc": 109
+  },
+  {
+    "repo": "denoland/deno",
+    "pr_number": 34206,
+    "url": "https://github.com/denoland/deno/pull/34206",
+    "title": "fix(ext/node): DSA keygen with arbitrary modulusLength",
+    "merged_at": "2026-05-18T03:43:19Z",
+    "diff_loc": 127
+  },
+  {
+    "repo": "denoland/deno",
+    "pr_number": 34219,
+    "url": "https://github.com/denoland/deno/pull/34219",
+    "title": "fix(ext/node): module hook fixes for ESM nextLoad, createRequire URL, and builtin redirects",
+    "merged_at": "2026-05-19T00:09:38Z",
+    "diff_loc": 56
+  },
+  {
+    "repo": "django/django",
+    "pr_number": 21152,
+    "url": "https://github.com/django/django/pull/21152",
+    "title": "Fixed #37057 -- Adjusted UniqueConstraint handling of UNKNOWN condition.",
+    "merged_at": "2026-04-22T21:28:36Z",
+    "diff_loc": 29
+  },
+  {
+    "repo": "django/django",
+    "pr_number": 21224,
+    "url": "https://github.com/django/django/pull/21224",
+    "title": "Removed hardcoded pks in annotations and delete_regress tests.",
+    "merged_at": "2026-05-04T12:44:23Z",
+    "diff_loc": 50
+  },
+  {
+    "repo": "django/django",
+    "pr_number": 21239,
+    "url": "https://github.com/django/django/pull/21239",
+    "title": "Fixed #37085 -- Added support for object-based form media stylesheet assets.",
+    "merged_at": "2026-05-07T14:49:12Z",
+    "diff_loc": 130
+  },
+  {
+    "repo": "django/django",
+    "pr_number": 21246,
+    "url": "https://github.com/django/django/pull/21246",
+    "title": "Refs CVE-2025-64460 -- Removed workaround for minidom document checks.",
+    "merged_at": "2026-05-13T14:54:02Z",
+    "diff_loc": 25
+  },
+  {
+    "repo": "django/django",
+    "pr_number": 21271,
+    "url": "https://github.com/django/django/pull/21271",
+    "title": "Fixed #37094 -- Replaced \"Go\" with \"Run\" in list_editable alert message.",
+    "merged_at": "2026-05-13T15:37:08Z",
+    "diff_loc": 24
+  },
+  {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15521,
+    "url": "https://github.com/fastapi/fastapi/pull/15521",
+    "title": "\ud83c\udf10 Update translations for ru (update-outdated)",
+    "merged_at": "2026-05-18T08:26:16Z",
+    "diff_loc": 85
+  },
+  {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15527,
+    "url": "https://github.com/fastapi/fastapi/pull/15527",
+    "title": "\ud83c\udf10 Update translations for de (update-outdated)",
+    "merged_at": "2026-05-18T15:13:52Z",
+    "diff_loc": 89
+  },
+  {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15528,
+    "url": "https://github.com/fastapi/fastapi/pull/15528",
+    "title": "\ud83c\udf10 Update translations for pt (update-outdated)",
+    "merged_at": "2026-05-18T15:15:47Z",
+    "diff_loc": 89
+  },
+  {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15529,
+    "url": "https://github.com/fastapi/fastapi/pull/15529",
+    "title": "\ud83c\udf10 Update translations for uk (update-outdated)",
+    "merged_at": "2026-05-18T15:22:00Z",
+    "diff_loc": 99
+  },
+  {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15530,
+    "url": "https://github.com/fastapi/fastapi/pull/15530",
+    "title": "\ud83c\udf10 Update translations for ja (update-outdated)",
+    "merged_at": "2026-05-18T15:39:28Z",
+    "diff_loc": 98
+  },
+  {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15548,
+    "url": "https://github.com/fastapi/fastapi/pull/15548",
+    "title": "\ud83d\udd12\ufe0f Only allow team members to modify dependencies",
+    "merged_at": "2026-05-18T09:06:24Z",
+    "diff_loc": 55
+  },
+  {
+    "repo": "gohugoio/hugo",
+    "pr_number": 14785,
+    "url": "https://github.com/gohugoio/hugo/pull/14785",
+    "title": "tpl/collections: Honor the Eqer interface in where comparisons",
+    "merged_at": "2026-04-20T17:45:06Z",
+    "diff_loc": 73
+  },
+  {
+    "repo": "gohugoio/hugo",
+    "pr_number": 14787,
+    "url": "https://github.com/gohugoio/hugo/pull/14787",
+    "title": "build(deps): bump github.com/bep/mclib from 1.20400.20402 to 1.20401.20400",
+    "merged_at": "2026-04-22T13:51:00Z",
+    "diff_loc": 22
+  },
+  {
+    "repo": "gohugoio/hugo",
+    "pr_number": 14802,
+    "url": "https://github.com/gohugoio/hugo/pull/14802",
+    "title": "langs/i18n: Improve default content language fallback",
+    "merged_at": "2026-04-25T08:43:38Z",
+    "diff_loc": 81
+  },
+  {
+    "repo": "gohugoio/hugo",
+    "pr_number": 14822,
+    "url": "https://github.com/gohugoio/hugo/pull/14822",
+    "title": "Fix HighlightCodeBlock inner HTML for plain code blocks",
+    "merged_at": "2026-05-09T09:41:18Z",
+    "diff_loc": 21
+  },
+  {
+    "repo": "remix-run/react-router",
+    "pr_number": 14981,
+    "url": "https://github.com/remix-run/react-router/pull/14981",
+    "title": "docs(headers): document how to read request headers from loaders and actions",
+    "merged_at": "2026-05-07T14:55:35Z",
+    "diff_loc": 35
+  },
+  {
+    "repo": "spf13/cobra",
+    "pr_number": 2356,
+    "url": "https://github.com/spf13/cobra/pull/2356",
+    "title": "fix: prevent completions from mutating os.Args via append side effect",
+    "merged_at": "2026-04-24T20:41:58Z",
+    "diff_loc": 60
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93763,
+    "url": "https://github.com/vercel/next.js/pull/93763",
+    "title": "Fix React 18 tests",
+    "merged_at": "2026-05-11T19:31:40Z",
+    "diff_loc": 23
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93766,
+    "url": "https://github.com/vercel/next.js/pull/93766",
+    "title": "Craigandrews/ensure isr lru is written if requests collapsed",
+    "merged_at": "2026-05-12T19:50:36Z",
+    "diff_loc": 152
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93784,
+    "url": "https://github.com/vercel/next.js/pull/93784",
+    "title": "docs: devIndicators with usage example",
+    "merged_at": "2026-05-12T09:02:47Z",
+    "diff_loc": 27
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93824,
+    "url": "https://github.com/vercel/next.js/pull/93824",
+    "title": "fix: renumber non-sequential errors in errors.json",
+    "merged_at": "2026-05-13T13:24:12Z",
+    "diff_loc": 88
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93827,
+    "url": "https://github.com/vercel/next.js/pull/93827",
+    "title": "[CC] fix: cachedNavigations missing asyncApiPromises in resumes",
+    "merged_at": "2026-05-14T14:50:42Z",
+    "diff_loc": 46
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93876,
+    "url": "https://github.com/vercel/next.js/pull/93876",
+    "title": "turbo-tasks: prioritize recomputed tasks with Recomputation priority",
+    "merged_at": "2026-05-17T19:36:08Z",
+    "diff_loc": 44
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93919,
+    "url": "https://github.com/vercel/next.js/pull/93919",
+    "title": "[backport] Fix server action forwarding loop with middleware rewrites",
+    "merged_at": "2026-05-19T07:11:50Z",
+    "diff_loc": 122
+  },
+  {
+    "repo": "vercel/next.js",
+    "pr_number": 93920,
+    "url": "https://github.com/vercel/next.js/pull/93920",
+    "title": "[backport] Patch `playwright-core` to resolve `_finishedPromise` on `requestFailed`",
+    "merged_at": "2026-05-18T16:44:08Z",
+    "diff_loc": 35
+  }
+]

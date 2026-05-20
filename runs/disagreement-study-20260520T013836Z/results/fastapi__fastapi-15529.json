@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "fastapi/fastapi",
+    "pr_number": 15529,
+    "url": "https://github.com/fastapi/fastapi/pull/15529",
+    "title": "\ud83c\udf10 Update translations for uk (update-outdated)",
+    "merged_at": "2026-05-18T15:22:00Z",
+    "diff_loc": 99
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe specialists are in complete agreement that these documentation-only changes are safe to ship. The changes consist of:\n1. Removing a link to Speakeasy from the list of OpenAPI client generators\n2. Minor Ukrainian translation corrections \n3. HTML structure improvements for sponsor display using semantic CSS classes instead of inline styles\n\nThe most important aspect of this change is the HTML refactoring (lines 57-75) which improves separation of concerns between content and presentation in the documentation. While this enhances maintainability, it has no impact on the FastAPI codebase functionality or security.\n\nNo architectural or security concerns were identified.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nThe changes are primarily documentation updates in Ukrainian language files with minimal architectural impact:\n\n1. **Line 33**: Simple removal of a link to Speakeasy from a list of OpenAPI client generators - no architectural concerns.\n\n2. **Lines 11, 46**: Minor Ukrainian language corrections (\"\u043f\u0440\u043e\u0434\u0430\u043a\u0448\u0438\u043d\u0443\" to \"\u043f\u0440\u043e\u0434\u0430\u043a\u0448\u043d\u0443\") - translation consistency improvement.\n\n3. **Lines 57-75**: HTML structure refactoring for sponsor display, replacing inline styles with semantic CSS classes. While this improves separation of concerns between content and presentation, it's a documentation-only change with no impact on the FastAPI codebase architecture."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nThe changes are focused on documentation and do not introduce security concerns. Here are the top findings:\n\n1. **Line 33**: Removed link to Speakeasy - No security implications as it's a documentation link update. [OWASP A6:2021 - Vulnerable and Outdated Components]\n\n2. **Lines 57-75**: Refactored HTML structure for sponsor display - This change improves the maintainability of the documentation but does not affect any security boundary. [OWASP A9:2021 - Security Logging and Monitoring Failures]\n\n3. **General**: No secrets, authentication, or injection vectors were introduced or modified in the documentation updates. The changes are strictly related to content and presentation, ensuring no new security risks. [OWASP A3:2021 - Injection]\n\nThe documentation changes are safe to ship as they do not affect the security posture of the application."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe specialists are in complete agreement that these documentation-only changes are safe to ship. The changes consist of:\n1. Removing a link to Speakeasy from the list of OpenAPI client generators\n2. Minor Ukrainian translation corrections \n3. HTML structure improvements for sponsor display using semantic CSS classes instead of inline styles\n\nThe most important aspect of this change is the HTML refactoring (lines 57-75) which improves separation of concerns between content and presentation in the documentation. While this enhances maintainability, it has no impact on the FastAPI codebase functionality or security.\n\nNo architectural or security concerns were identified."
+      }
+    ],
+    "elapsed_s": 21,
+    "raw_grupr_id": "acee3020-79b9-433b-99c7-431798b25342",
+    "timed_out": false
+  },
+  "panel_wall_s": 21,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Line 281**: Typo fix: `prisoner-of-askaban` \u2192 `prisoner-of-azkaban` - This is a correct fix for a Harry Potter reference typo.\n\n2. **Lines 57-88**: Addition of properly structured HTML for sponsor cards and opinion tabs - improves presentation and accessibility with proper ARIA labels.\n\n3. **Line 33**: Removal of Speakeasy link from client generation tools - appears intentional, possibly due to sponsorship changes or tool deprecation.\n\n**Notes** (lower-priority observations)\n\n- Multiple instances of \"\u043f\u0440\u043e\u0434\u0430\u043a\u0448\u0438\u043d\" \u2192 \"\u043f\u0440\u043e\u0434\u0430\u043a\u0448\u043d\" corrections throughout (lines 11, 46) - consistent terminology improvement\n- Addition of `loading=\"lazy\"` attributes to images for better performance\n- New sections added for FastAPI Conference and proper structuring of sponsors by tier (Gold/Silver separated)\n- Minor grammar improvement on line 320: \"\u0442\u0456\u043b\u043e `PUT`-\u0437\u0430\u043f\u0438\u0442\u0443\" \u2192 \"\u0442\u0456\u043b\u043e \u0437 `PUT`-\u0437\u0430\u043f\u0438\u0442\u0443\"\n- Info blocks changed to Note blocks (lines 5, 21) for consistency",
+    "elapsed_s": 16,
+    "input_tokens": 5807,
+    "output_tokens": 277
+  },
+  "single_wall_s": 16,
+  "user_email_var": "GRUPR_TEST_CONV_C_EMAIL",
+  "completed_at": "2026-05-20T01:52:49Z"
+}

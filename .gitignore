@@ -16,3 +16,10 @@ runs/*/
 # Day-3 baseline — the sweep that surfaced the P0s fixed in api a4ff4c7
 !runs/2026-05-13_pre-launch/
 !runs/2026-05-13_pre-launch/summary.md
+# Day-11 disagreement study — pre-launch evidence for the multi-LLM
+# headline stat; full run preserved for auditability + reproducibility.
+!runs/disagreement-study-20260520T013836Z/
+!runs/disagreement-study-20260520T013836Z/**
+
+# One-off smoke-test artifacts dropped in repo root
+smoke-code-review-wrappers.json

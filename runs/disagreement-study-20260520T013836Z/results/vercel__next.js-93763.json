@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93763,
+    "url": "https://github.com/vercel/next.js/pull/93763",
+    "title": "Fix React 18 tests",
+    "merged_at": "2026-05-11T19:31:40Z",
+    "diff_loc": 23
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe code introduces a clean abstraction for React version detection and appropriately handles version-specific test behavior. While the Security reviewer raised concerns about environment variable handling and hardcoded version checks, these are minor issues in a test environment context.\n\n**Must-fix**: None\n\n**Should-fix**: Consider adding validation for `NEXT_TEST_REACT_VERSION` environment variable to ensure it contains only numeric values (e.g., using a more robust parsing approach than `parseInt`).\n\n**Nice-to-have**: Track the underlying React 18 build/server lifecycle race condition mentioned in the telemetry test skip comment to ensure it gets resolved and tests can be re-enabled.\n\nThe Architect and Security reviewers agree this is shippable, with the Security reviewer's concerns being more about future maintainability than immediate risks.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Clean abstraction for React version detection** (lines 176-177): The `isReact18` export provides a well-named, centralized way to detect React version across tests. This promotes consistency and reduces duplication.\n\n2. **Clear separation of concerns** (lines 7-12): The comment explaining why telemetry tests are skipped for React 18 documents a cross-cutting concern without coupling the test logic to React version detection internals.\n\n3. **Consistent naming pattern** (lines 53-55): The regex pattern change maintains symmetry between React 18 and 19 version checks, using the same format (`/^18\\./` vs `/^19\\./`) which improves readability and maintainability."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Environment Variable Handling** (lines 176-177): The `process.env.NEXT_TEST_REACT_VERSION` is used to determine the React version. Ensure that this environment variable is properly sanitized to prevent potential injection attacks or misconfigurations. [OWASP A01:2021 - Broken Access Control]\n\n2. **Hardcoded Version Check** (lines 53-55): The use of hardcoded version numbers in tests (e.g., `/^18\\./` and `/^19\\./`) may lead to maintenance challenges if new React versions are introduced. Consider refactoring this to make version checks more dynamic or configurable. [OWASP A06:2021 - Vulnerable and Outdated Components]\n\n3. **Commented Code Skipping** (lines 7-12): While the comment explains why tests are skipped for React 18, relying on skipping tests based on conditions like this can introduce gaps in test coverage. Ensure that any issues leading to this decision are tracked and addressed to maintain comprehensive test coverage. [OWASP A03:2021 - Injection]"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe code introduces a clean abstraction for React version detection and appropriately handles version-specific test behavior. While the Security reviewer raised concerns about environment variable handling and hardcoded version checks, these are minor issues in a test environment context.\n\n**Must-fix**: None\n\n**Should-fix**: Consider adding validation for `NEXT_TEST_REACT_VERSION` environment variable to ensure it contains only numeric values (e.g., using a more robust parsing approach than `parseInt`).\n\n**Nice-to-have**: Track the underlying React 18 build/server lifecycle race condition mentioned in the telemetry test skip comment to ensure it gets resolved and tests can be re-enabled.\n\nThe Architect and Security reviewers agree this is shippable, with the Security reviewer's concerns being more about future maintainability than immediate risks."
+      }
+    ],
+    "elapsed_s": 21,
+    "raw_grupr_id": "6a75695f-dca2-4799-86df-abbc6d9da0ec",
+    "timed_out": false
+  },
+  "panel_wall_s": 21,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Line 12**: The telemetry test is being skipped for React 18 due to an intermittent race condition (\"can not run export while server is running\"). While this is a workaround rather than a fix, the comment clearly documents this as a known issue and notes that telemetry itself isn't React-version-specific.\n\n2. **Line 55**: The regex pattern change from `/19/` to `isReact18 ? /^18\\./ : /^19\\./` is more precise with the `^` anchor and period escape, preventing false matches like \"219\" or \"1918\".\n\n3. **Lines 171-176**: The `isReact18` utility correctly handles the case where `NEXT_TEST_REACT_VERSION` is unset/empty by defaulting to false (React 19), which aligns with the documented behavior.\n\n**Notes** (lower-priority observations)\n\n- The implementation properly imports and uses the new `isReact18` utility in both test files\n- The semicolon before the IIFE pattern on line 12 is a good defensive practice to prevent ASI issues\n- The parseInt approach with base 10 is appropriate for the version check",
+    "elapsed_s": 14,
+    "input_tokens": 1116,
+    "output_tokens": 297
+  },
+  "single_wall_s": 14,
+  "user_email_var": "GRUPR_TEST_EXTERNAL_DEV_EMAIL",
+  "completed_at": "2026-05-20T01:59:13Z"
+}

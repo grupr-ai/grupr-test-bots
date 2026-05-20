@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93827,
+    "url": "https://github.com/vercel/next.js/pull/93827",
+    "title": "[CC] fix: cachedNavigations missing asyncApiPromises in resumes",
+    "merged_at": "2026-05-14T14:50:42Z",
+    "diff_loc": 46
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\nThe most critical issue is the **injection risk via request metadata**. The code passes `fallbackParams` through `addRequestMeta` without visible sanitization, creating a potential security vulnerability where malicious input could be propagated through the system. This must be addressed before shipping.\n\n**Must-fix**:\n- Add proper validation and sanitization for `prerenderInfo.fallbackRouteParams` before passing it to `addRequestMeta` to prevent injection attacks\n\n**Should-fix**:\n- Extract the duplicated `asyncApiPromises` initialization logic into a shared function to improve maintainability\n- Consider unifying the parameter handling approach instead of splitting between `fallbackRouteParams: null` and request metadata\n\n**Nice-to-have**:\n- Document the data flow between app-page and app-render to make the implicit coupling via request metadata more explicit",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Coupling via request metadata** (lines 1931-1937): Using `addRequestMeta` to pass `fallbackParams` creates implicit coupling between the app-page template and app-render components. This side-channel communication pattern makes the data flow less explicit and harder to trace.\n\n2. **Duplicated initialization logic** (lines 3697-3702, 3832-3837): The `asyncApiPromises` initialization is duplicated in two separate code paths within `renderToStream`. This violates DRY and suggests these initialization blocks could be extracted into a shared setup function.\n\n3. **Asymmetric parameter handling** (lines 1945-1948): The design creates an asymmetry where `fallbackRouteParams` is explicitly set to `null` during resume renders while the actual fallback params are passed via request metadata. This split approach to parameter handling could be unified for clearer intent."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Injection Risk via Request Metadata** (lines 1931-1937): Using `addRequestMeta` to include `fallbackParams` can introduce potential injection risks if the `prerenderInfo.fallbackRouteParams` is not properly sanitized before being added to the request metadata. This could allow for malicious input to be propagated through the system. Ensure proper validation and sanitization are applied. **(OWASP A01:2021 - Broken Access Control)**\n\n2. **Potential Information Exposure through Cookies and Headers** (lines 3697-3702, 3832-3837): The `createAsyncApiPromises` function utilizes `requestStore.cookies`, `requestStore.mutableCookies`, and `requestStore.headers`, which could expose sensitive information if not properly handled or if these stores contain untrusted data. Ensure sensitive information is protected and not leaked through logs or error messages. **(OWASP A01:2021 - Broken Access Control)**\n\n3. **Authentication and Trust Boundary Concerns** (line 3697): The use of `requestStore` without explicit authentication checks could lead to trust boundary violations. Ensure that all interactions with `requestStore` are authenticated and authorized to prevent unauthorized access to potentially sensitive operations. **(OWASP A01:2021 - Broken Access Control)**\n\nMake these changes to enhance security and ensure compliance with best practices."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\nThe most critical issue is the **injection risk via request metadata**. The code passes `fallbackParams` through `addRequestMeta` without visible sanitization, creating a potential security vulnerability where malicious input could be propagated through the system. This must be addressed before shipping.\n\n**Must-fix**:\n- Add proper validation and sanitization for `prerenderInfo.fallbackRouteParams` before passing it to `addRequestMeta` to prevent injection attacks\n\n**Should-fix**:\n- Extract the duplicated `asyncApiPromises` initialization logic into a shared function to improve maintainability\n- Consider unifying the parameter handling approach instead of splitting between `fallbackRouteParams: null` and request metadata\n\n**Nice-to-have**:\n- Document the data flow between app-page and app-render to make the implicit coupling via request metadata more explicit"
+      }
+    ],
+    "elapsed_s": 20,
+    "raw_grupr_id": "d0d525f7-acbc-44a2-b3ce-1148800ee827",
+    "timed_out": false
+  },
+  "panel_wall_s": 20,
+  "single_model": {
+    "verdict": "ship-with-changes",
+    "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Missing error handling for async operations** (lines 3829-3836): The new `createAsyncApiPromises` calls are not wrapped in try-catch blocks, which could lead to unhandled promise rejections during render operations.\n\n2. **Potential race condition with fallback params** (lines 1931-1937): The `addRequestMeta` call modifies the request object during streaming, but there's no synchronization to ensure this metadata is available before the downstream `doRender` begins processing.\n\n3. **Test coverage reduction** (multiple test file changes): Removing `setTimeout` calls from tests eliminates artificial delays that may have been masking timing-related issues. The tests should be updated to use proper synchronization mechanisms instead.\n\n**Notes** (lower-priority observations)\n\n- The comment at line 1945-1946 is helpful but could be more concise\n- The duplicated code for creating async API promises (lines 3697-3701 and 3832-3836) suggests this logic could be extracted into a helper function\n- The fallback params logic adds complexity to the resume render flow - consider documenting this flow in the codebase architecture docs",
+    "elapsed_s": 14,
+    "input_tokens": 2888,
+    "output_tokens": 293
+  },
+  "single_wall_s": 14,
+  "user_email_var": "GRUPR_TEST_NEW_USER_EMAIL",
+  "completed_at": "2026-05-20T02:01:46Z"
+}

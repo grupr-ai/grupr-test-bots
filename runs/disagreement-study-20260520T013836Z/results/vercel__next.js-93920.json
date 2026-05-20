@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93920,
+    "url": "https://github.com/vercel/next.js/pull/93920",
+    "title": "[backport] Patch `playwright-core` to resolve `_finishedPromise` on `requestFailed`",
+    "merged_at": "2026-05-18T16:44:08Z",
+    "diff_loc": 35
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\nThe specialists agree this is a well-architected solution that properly maintains abstraction boundaries and uses existing APIs appropriately. However, the Security specialist raises a valid concern about error handling.\n\n**Must-fix**: The empty catch block (line 22) should log errors rather than silently swallowing them. While the comment explains this is intentional to avoid unhandled rejections during teardown, logging would help diagnose issues without breaking the intended behavior:\n\n```javascript\n.catch((err) => {\n  // Log but don't throw - context may be tearing down\n  if (process.env.NODE_ENV !== 'production') {\n    console.warn('Failed to resolve response promise during request failure:', err);\n  }\n});\n```\n\nThe other security concerns about dependency management and version checking are general best practices rather than specific issues with this patch.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Good abstraction preservation** (lines 14-24): The patch maintains the existing event-driven architecture by properly emitting the same events after resolving the promise, preserving the abstraction boundaries between request lifecycle management and event handling.\n\n2. **Appropriate coupling** (line 23): The solution correctly leverages the existing `request.response()` async API rather than introducing new dependencies or tight coupling to internal state, maintaining loose coupling between request and response objects.\n\n3. **Clear naming and intent** (lines 7-18): The extensive comment clearly documents the architectural context and rationale for the patch, making the design decision transparent for future maintainers who need to understand why this client-side promise resolution was necessary."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Improper Error Handling** (line 22): The `.catch(() => {})` implementation results in a swallowed promise rejection, which can obscure issues that might arise during the execution of `request.response()`. Consider logging the error or handling it appropriately. (OWASP A10:2021 - Logging and Monitoring Failures)\n\n2. **Security Misconfiguration** (general): No explicit security checks or configurations were noted in the patch application process within the package files, which could lead to insecure dependencies being utilized if not properly managed elsewhere. Ensure that dependency management and security configurations are reviewed. (OWASP A05:2021 - Security Misconfiguration)\n\n3. **Insecure Dependency** (lines 34-37): Updating dependencies like `playwright-core` without a thorough review can introduce vulnerabilities if the version being updated to has known issues. Always check for known vulnerabilities in the new version of dependencies. (OWASP A06:2021 - Vulnerable and Outdated Components)"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\nThe specialists agree this is a well-architected solution that properly maintains abstraction boundaries and uses existing APIs appropriately. However, the Security specialist raises a valid concern about error handling.\n\n**Must-fix**: The empty catch block (line 22) should log errors rather than silently swallowing them. While the comment explains this is intentional to avoid unhandled rejections during teardown, logging would help diagnose issues without breaking the intended behavior:\n\n```javascript\n.catch((err) => {\n  // Log but don't throw - context may be tearing down\n  if (process.env.NODE_ENV !== 'production') {\n    console.warn('Failed to resolve response promise during request failure:', err);\n  }\n});\n```\n\nThe other security concerns about dependency management and version checking are general best practices rather than specific issues with this patch."
+      }
+    ],
+    "elapsed_s": 23,
+    "raw_grupr_id": "118903e0-9833-4f78-9966-22e0ab596b2b",
+    "timed_out": false
+  },
+  "panel_wall_s": 23,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff)\n\n1. **Proper promise resolution pattern** (lines 31-34): The patch correctly resolves the `_finishedPromise` and includes a catch block to prevent unhandled rejections, which is critical for async error handling.\n\n2. **Clear problem statement** (lines 12-21): The extensive comment explains the issue well - failed/canceled requests were causing `response.finished()` to hang because the client-side promise wasn't being resolved.\n\n3. **Minimal, targeted fix** (lines 31-34): The patch mirrors existing behavior from `_onRequestFinished` and only adds what's necessary to resolve the hanging promise issue.\n\n**Notes** (lower-priority observations)\n\n- The patch is against a specific version (1.58.2) of playwright-core, which is appropriate for stability\n- The comment mentions this is a Next.js-specific patch, suggesting this addresses a framework-specific integration issue\n- The empty catch block is intentional and documented to prevent unhandled rejections during context teardown",
+    "elapsed_s": 12,
+    "input_tokens": 1425,
+    "output_tokens": 249
+  },
+  "single_wall_s": 12,
+  "user_email_var": "GRUPR_TEST_CONV_A_EMAIL",
+  "completed_at": "2026-05-20T02:03:54Z"
+}

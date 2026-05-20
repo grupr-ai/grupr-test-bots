@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "django/django",
+    "pr_number": 21246,
+    "url": "https://github.com/django/django/pull/21246",
+    "title": "Refs CVE-2025-64460 -- Removed workaround for minidom document checks.",
+    "merged_at": "2026-05-13T14:54:02Z",
+    "diff_loc": 25
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe code removes a problematic performance optimization that relied on monkey-patching Python's standard library internals. This is a clear improvement for maintainability and code quality.\n\n**Key disagreement surfaced**: The Security reviewer raised concerns about XXE vulnerabilities and XML validation, but these are pre-existing issues in the codebase, not introduced by this change. The removal of the `fast_cache_clearing` context manager doesn't affect the security posture of the XML parsing.\n\n**Single most important issue**: None that blocks this change. The removal eliminates fragile coupling to undocumented minidom internals, which is a significant improvement. Any performance regression from removing this optimization should be addressed through proper, documented approaches rather than monkey-patching the standard library.\n\nThe security concerns raised are valid but should be addressed in a separate security-focused change that properly configures the XML parser to disable external entities and adds input validation.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\n**Top 3 Findings**:\n\n1. **Good removal of monkey-patching abstraction** (lines 18-34): The `fast_cache_clearing` context manager that temporarily modified `minidom._in_document` was a questionable design pattern. Monkey-patching internal implementation details of standard library modules creates fragile coupling to undocumented internals. Removing this improves maintainability.\n\n2. **Clean separation of concerns** (line 250): The removal simplifies the `__next__` method by eliminating the performance optimization concern from the deserialization logic. This makes the code's intent clearer - it's now purely focused on XML parsing without mixing in performance workarounds.\n\n3. **Reduced coupling to minidom internals** (removed imports line 7): By removing the minidom import, the module now only depends on `pulldom`, reducing unnecessary coupling to implementation details of the XML processing stack. This makes the module more resilient to changes in Python's standard library."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 Findings**:\n\n1. **XML External Entities (XXE) Risk** (lines 5-9): The use of `xml.dom.pulldom` without specific mention of disabling external entity parsing could lead to XXE attacks if user-controlled XML is parsed. Ensure that external entity parsing is disabled to protect against this vulnerability. (OWASP A04:2021 - Insecure Design)\n\n2. **Use of Untrusted Data** (line 250): The `expandNode` method is called directly on the `node` without any validation or sanitization. If the XML being processed can be influenced by an attacker, this could lead to XML injection attacks. Carefully validate and sanitize XML inputs. (OWASP A01:2021 - Broken Access Control)\n\n3. **Potential Information Disclosure** (line 250): If the XML data being processed is not adequately validated, there is a risk of processing malicious XML that could disclose sensitive information or lead to data leaks. Ensure that all XML data is properly validated to prevent such risks. (OWASP A06:2021 - Sensitive Data Exposure)"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe code removes a problematic performance optimization that relied on monkey-patching Python's standard library internals. This is a clear improvement for maintainability and code quality.\n\n**Key disagreement surfaced**: The Security reviewer raised concerns about XXE vulnerabilities and XML validation, but these are pre-existing issues in the codebase, not introduced by this change. The removal of the `fast_cache_clearing` context manager doesn't affect the security posture of the XML parsing.\n\n**Single most important issue**: None that blocks this change. The removal eliminates fragile coupling to undocumented minidom internals, which is a significant improvement. Any performance regression from removing this optimization should be addressed through proper, documented approaches rather than monkey-patching the standard library.\n\nThe security concerns raised are valid but should be addressed in a separate security-focused change that properly configures the XML parser to disable external entities and adds input validation."
+      }
+    ],
+    "elapsed_s": 21,
+    "raw_grupr_id": "2a797401-2791-4d0e-9c36-f299e6b6ac03",
+    "timed_out": false
+  },
+  "panel_wall_s": 21,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Removal of monkey-patching workaround** (lines 18-35): The diff removes a context manager that was monkey-patching Python's minidom module. This is a good change as it eliminates fragile runtime modification of standard library internals.\n\n2. **Clean removal with no replacement logic** (lines 250-251): The `fast_cache_clearing()` context manager is removed from the actual usage site without any replacement, suggesting the underlying performance issue has been resolved elsewhere or was no longer necessary.\n\n3. **No other code dependencies** (entire diff): The removed code appears to be self-contained with no other references or dependencies that would break from its removal.\n\n**Notes** (lower-priority observations)\n\n- The workaround was specifically for \"performance issues in minidom document checks\" according to the docstring. If this was addressing a real performance issue, it would be good to verify that performance regression tests pass.\n- The implementation was checking if `_in_document` was already a lambda before replacing it, showing some care was taken, but monkey-patching standard library internals is still an anti-pattern that's good to remove.\n- The import of `contextmanager` and `minidom` are also cleaned up, keeping imports minimal.",
+    "elapsed_s": 15,
+    "input_tokens": 644,
+    "output_tokens": 304
+  },
+  "single_wall_s": 15,
+  "user_email_var": "GRUPR_TEST_NEW_USER_EMAIL",
+  "completed_at": "2026-05-20T01:49:18Z"
+}

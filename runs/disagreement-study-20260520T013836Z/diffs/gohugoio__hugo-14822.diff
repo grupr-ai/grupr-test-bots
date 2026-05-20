@@ -1,0 +1,51 @@
+diff --git a/markup/goldmark/codeblocks/codeblocks_integration_test.go b/markup/goldmark/codeblocks/codeblocks_integration_test.go
+index c3808359dcd..faa079a81f8 100644
+--- a/markup/goldmark/codeblocks/codeblocks_integration_test.go
++++ b/markup/goldmark/codeblocks/codeblocks_integration_test.go
+@@ -147,6 +147,12 @@ title: "p1"
+ fmt.Println("Hello, World!");
+ §§§
+ 
++## Plain Code
++
++§§§
++plain <code> & text
++§§§
++
+ `
+ 
+ 	b := hugolib.Test(t, files)
+@@ -154,6 +160,8 @@ fmt.Println("Hello, World!");
+ 	b.AssertFileContent("public/p1/index.html",
+ 		"Inner: |<span class=\"line\"><span class=\"cl\"><span class=\"nx\">fmt</span><span class=\"p\">.</span><span class=\"nf\">Println</span><span class=\"p\">(</span><span class=\"s\">&#34;Hello, World!&#34;</span><span class=\"p\">);</span></span></span>|",
+ 		"Wrapped: |<div class=\"highlight\"><pre tabindex=\"0\" class=\"chroma\"><code class=\"language-go\" data-lang=\"go\"><span class=\"line\"><span class=\"cl\"><span class=\"nx\">fmt</span><span class=\"p\">.</span><span class=\"nf\">Println</span><span class=\"p\">(</span><span class=\"s\">&#34;Hello, World!&#34;</span><span class=\"p\">);</span></span></span></code></pre></div>|",
++		"Inner: |plain &lt;code&gt; &amp; text|",
++		"Wrapped: |<pre tabindex=\"0\"><code>plain &lt;code&gt; &amp; text</code></pre>|",
+ 	)
+ }
+ 
+diff --git a/markup/highlight/highlight.go b/markup/highlight/highlight.go
+index 8fe30425433..bb58b9ca06d 100644
+--- a/markup/highlight/highlight.go
++++ b/markup/highlight/highlight.go
+@@ -181,13 +181,14 @@ func highlight(fw hugio.FlexiWriter, code, lang string, attributes []attributes.
+ 	if lexer == nil {
+ 		if cfg.Hl_inline {
+ 			fmt.Fprintf(w, "<code%s>%s</code>", inlineCodeAttrs(lang), gohtml.EscapeString(code))
+-		} else {
+-			preWrapper := getPreWrapper(lang, w)
+-			fmt.Fprint(w, preWrapper.Start(true, ""))
+-			fmt.Fprint(w, gohtml.EscapeString(code))
+-			fmt.Fprint(w, preWrapper.End(true))
++			return 0, 0, nil
+ 		}
+-		return 0, 0, nil
++
++		preWrapper := getPreWrapper(lang, w)
++		fmt.Fprint(w, preWrapper.Start(true, ""))
++		fmt.Fprint(w, gohtml.EscapeString(code))
++		fmt.Fprint(w, preWrapper.End(true))
++		return preWrapper.low, preWrapper.high, nil
+ 	}
+ 
+ 	style := styles.Get(cfg.Style)

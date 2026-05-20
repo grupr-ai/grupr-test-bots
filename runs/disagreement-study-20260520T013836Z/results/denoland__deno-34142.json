@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "denoland/deno",
+    "pr_number": 34142,
+    "url": "https://github.com/denoland/deno/pull/34142",
+    "title": "fix(node): weakly track util.aborted resources",
+    "merged_at": "2026-05-17T07:31:38Z",
+    "diff_loc": 82
+  },
+  "panel": {
+    "verdict": "ship-with-changes",
+    "synth_content": "**Overall verdict**: ship-with-changes\n\nThe implementation correctly addresses the memory leak issue by using weak references and finalization registry to clean up abort signal handlers when resources are garbage collected. However, both reviewers identified legitimate concerns about code clarity and maintainability.\n\n**Most important issue**: The complex resource tracking logic with nested weak references and mixed responsibilities in the `aborted` function makes the code difficult to understand and maintain. This should be refactored to improve clarity.\n\n**Must-fix**:\n- Extract the abort registry logic into a dedicated class or module with clearer naming (e.g., `AbortedPromiseRegistry`)\n- Simplify the `aborted` function by separating resource tracking from the main logic\n\n**Should-fix**:\n- Improve naming consistency throughout (replace generic names like `heldValue`, `algorithm` with descriptive names)\n- Add more comprehensive input validation for the `resource` parameter\n- Consider adding logging for debugging when resources are registered/collected\n\n**Nice-to-have**:\n- Group related weak reference operations into a utility module\n- Add JSDoc comments explaining the memory management strategy\n\nThe test coverage is good and demonstrates the fix works as intended. With the suggested refactoring for clarity, this change will be a solid improvement to prevent memory leaks in long-running applications.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 Findings:**\n\n1. **Naming inconsistency and unclear abstraction** (lines 85-90, 281-293): The `abortedRegistry` uses generic names like `heldValue` and `algorithm` that don't clearly express their purpose. The registry pattern implementation mixes concerns - it's both managing weak references and handling abort signal cleanup. Consider extracting this into a dedicated `AbortedPromiseRegistry` class with clearer method names like `registerAbortedPromise` and `cleanupAbortHandler`.\n\n2. **Coupling through primordials access pattern** (lines 25-35): The code adds `SafeFinalizationRegistry`, `SafeWeakRef`, and `WeakRefPrototypeDeref` to the primordials destructuring, creating tight coupling to the specific primordials structure. This pattern makes the module harder to test and understand in isolation. Consider grouping related weak reference operations into a dedicated utility module.\n\n3. **Complex resource tracking logic** (lines 280-293): The `aborted` function now has multiple responsibilities - validating inputs, creating promises, managing weak references, and registering cleanup callbacks. The nested weak reference structure (`resourceRef` and `signal` wrapped in `SafeWeakRef`) adds cognitive overhead. Consider extracting the resource tracking logic into a separate helper function with a clearer interface."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\n**Top 3 Findings:**\n\n1. **Improper Resource Management** (lines 82-93): The use of `SafeFinalizationRegistry` with weak references introduces complexity and potential pitfalls related to resource management. While this approach helps with memory leaks, improper handling can lead to logic bugs if objects are prematurely collected. This relates to the OWASP category of Insufficient Logging & Monitoring due to potential silent failures. Ensure robust testing and consider logging when resources are registered or collected.\n\n2. **Unvalidated Input** (lines 280-293): The `aborted` function accepts a `signal` and `resource` without thorough validation of the resource's structure or type beyond `allowArray` and `allowFunction`. This could lead to unexpected behavior if invalid objects are passed, potentially causing application logic errors. This falls under the OWASP category of Security Misconfiguration. Implement stricter validation checks or type assertions to prevent misuse.\n\n3. **Exposed Internal Functionality** (lines 252-293): Directly exposing the `aborted` function for external use without encapsulating its complex logic could lead to misuse or security issues, especially if integrated into larger systems. This aligns with the OWASP category of Sensitive Data Exposure if the function is used with sensitive signals or resources. Consider providing a higher-level API that abstracts these details and ensures safe usage patterns."
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship-with-changes",
+        "content": "**Overall verdict**: ship-with-changes\n\nThe implementation correctly addresses the memory leak issue by using weak references and finalization registry to clean up abort signal handlers when resources are garbage collected. However, both reviewers identified legitimate concerns about code clarity and maintainability.\n\n**Most important issue**: The complex resource tracking logic with nested weak references and mixed responsibilities in the `aborted` function makes the code difficult to understand and maintain. This should be refactored to improve clarity.\n\n**Must-fix**:\n- Extract the abort registry logic into a dedicated class or module with clearer naming (e.g., `AbortedPromiseRegistry`)\n- Simplify the `aborted` function by separating resource tracking from the main logic\n\n**Should-fix**:\n- Improve naming consistency throughout (replace generic names like `heldValue`, `algorithm` with descriptive names)\n- Add more comprehensive input validation for the `resource` parameter\n- Consider adding logging for debugging when resources are registered/collected\n\n**Nice-to-have**:\n- Group related weak reference operations into a utility module\n- Add JSDoc comments explaining the memory management strategy\n\nThe test coverage is good and demonstrates the fix works as intended. With the suggested refactoring for clarity, this change will be a solid improvement to prevent memory leaks in long-running applications."
+      }
+    ],
+    "elapsed_s": 33,
+    "raw_grupr_id": "f8011013-3054-4cb4-ac29-2f968d301229",
+    "timed_out": false
+  },
+  "panel_wall_s": 33,
+  "single_model": {
+    "verdict": "ship-with-changes",
+    "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings** (with line refs from the diff)\n\n1. **Line 87**: The `abortedRegistry` callback calls `WeakRefPrototypeDeref` on the signal WeakRef, but doesn't handle the case where the signal itself has been garbage collected. If the signal is GC'd before the resource, calling `signal[abortSignal.remove]` on undefined will throw.\n\n2. **Line 290**: The `unregister` call uses `algorithm` as the unregister token, but the register call on line 293 also uses `algorithm` as the third parameter. This creates a potential race condition where the registry might be unregistered before the resource is actually GC'd if the algorithm is called synchronously.\n\n3. **Line 282-285**: The algorithm function checks if the resource is still alive via WeakRef before resolving, but doesn't check if the signal is aborted. This could lead to the promise never resolving if the resource is GC'd after the signal aborts but before the algorithm runs.\n\n**Notes** (lower-priority observations)\n\n- The test file uses `declare const gc` which assumes V8's gc global is available - this is fragile and test-specific\n- The copyright notice in the test file says \"2018-2026\" which seems like an unusual date range\n- Consider adding a comment explaining the memory leak this fix addresses for future maintainers\n- The `__proto__: null` pattern on line 290 is good for preventing prototype pollution",
+    "elapsed_s": 18,
+    "input_tokens": 1686,
+    "output_tokens": 349
+  },
+  "single_wall_s": 18,
+  "user_email_var": "GRUPR_TEST_NEW_USER_EMAIL",
+  "completed_at": "2026-05-20T01:41:54Z"
+}

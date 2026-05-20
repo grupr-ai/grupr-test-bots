@@ -1,0 +1,114 @@
+diff --git a/tests/annotations/tests.py b/tests/annotations/tests.py
+index b94f44ef222c..42fccca7d6eb 100644
+--- a/tests/annotations/tests.py
++++ b/tests/annotations/tests.py
+@@ -742,8 +742,7 @@ def test_column_field_ordering(self):
+         4. model_related_fields
+         """
+         store = Store.objects.first()
+-        Employee.objects.create(
+-            id=1,
++        e1 = Employee.objects.create(
+             first_name="Max",
+             manager=True,
+             last_name="Paine",
+@@ -751,8 +750,7 @@ def test_column_field_ordering(self):
+             age=23,
+             salary=Decimal(50000.00),
+         )
+-        Employee.objects.create(
+-            id=2,
++        e2 = Employee.objects.create(
+             first_name="Buffy",
+             manager=False,
+             last_name="Summers",
+@@ -770,8 +768,18 @@ def test_column_field_ordering(self):
+         )
+ 
+         rows = [
+-            (1, "Max", True, 42, "Paine", 23, Decimal(50000.00), store.name, 17),
+-            (2, "Buffy", False, 42, "Summers", 18, Decimal(40000.00), store.name, 17),
++            (e1.pk, "Max", True, 42, "Paine", 23, Decimal(50000.00), store.name, 17),
++            (
++                e2.pk,
++                "Buffy",
++                False,
++                42,
++                "Summers",
++                18,
++                Decimal(40000.00),
++                store.name,
++                17,
++            ),
+         ]
+ 
+         self.assertQuerySetEqual(
+@@ -792,8 +800,7 @@ def test_column_field_ordering(self):
+ 
+     def test_column_field_ordering_with_deferred(self):
+         store = Store.objects.first()
+-        Employee.objects.create(
+-            id=1,
++        e1 = Employee.objects.create(
+             first_name="Max",
+             manager=True,
+             last_name="Paine",
+@@ -801,8 +808,7 @@ def test_column_field_ordering_with_deferred(self):
+             age=23,
+             salary=Decimal(50000.00),
+         )
+-        Employee.objects.create(
+-            id=2,
++        e2 = Employee.objects.create(
+             first_name="Buffy",
+             manager=False,
+             last_name="Summers",
+@@ -820,8 +826,18 @@ def test_column_field_ordering_with_deferred(self):
+         )
+ 
+         rows = [
+-            (1, "Max", True, 42, "Paine", 23, Decimal(50000.00), store.name, 17),
+-            (2, "Buffy", False, 42, "Summers", 18, Decimal(40000.00), store.name, 17),
++            (e1.pk, "Max", True, 42, "Paine", 23, Decimal(50000.00), store.name, 17),
++            (
++                e2.pk,
++                "Buffy",
++                False,
++                42,
++                "Summers",
++                18,
++                Decimal(40000.00),
++                store.name,
++                17,
++            ),
+         ]
+ 
+         # and we respect deferred columns!
+diff --git a/tests/delete_regress/tests.py b/tests/delete_regress/tests.py
+index ce5a0db8ab86..dc1039f7b98b 100644
+--- a/tests/delete_regress/tests.py
++++ b/tests/delete_regress/tests.py
+@@ -58,9 +58,9 @@ def setUp(self):
+     def test_concurrent_delete(self):
+         """Concurrent deletes don't collide and lock the database (#9479)."""
+         with transaction.atomic():
+-            Book.objects.create(id=1, pagecount=100)
+-            Book.objects.create(id=2, pagecount=200)
+-            Book.objects.create(id=3, pagecount=300)
++            Book.objects.create(pagecount=100)
++            book = Book.objects.create(pagecount=200)
++            Book.objects.create(pagecount=300)
+ 
+         with transaction.atomic():
+             # Start a transaction on the main connection.
+@@ -68,7 +68,9 @@ def test_concurrent_delete(self):
+ 
+             # Delete something using another database connection.
+             with self.conn2.cursor() as cursor2:
+-                cursor2.execute("DELETE from delete_regress_book WHERE id = 1")
++                cursor2.execute(
++                    "DELETE from delete_regress_book WHERE id = %s", [book.pk]
++                )
+             self.conn2.commit()
+ 
+             # In the same transaction on the main connection, perform a

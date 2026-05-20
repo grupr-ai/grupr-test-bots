@@ -1,0 +1,141 @@
+diff --git a/ext/node/polyfills/util.ts b/ext/node/polyfills/util.ts
+index c6bce289f6ef1e..e7b0e83fdcf812 100644
+--- a/ext/node/polyfills/util.ts
++++ b/ext/node/polyfills/util.ts
+@@ -22,7 +22,9 @@ const {
+   ObjectSetPrototypeOf,
+   ReflectApply,
+   ReflectConstruct,
++  SafeFinalizationRegistry,
+   SafeSet,
++  SafeWeakRef,
+   SetPrototypeAdd,
+   SetPrototypeHas,
+   StringPrototypeIsWellFormed,
+@@ -30,6 +32,7 @@ const {
+   StringPrototypeToWellFormed,
+   PromiseResolve,
+   PromiseWithResolvers,
++  WeakRefPrototypeDeref,
+ } = primordials;
+ 
+ const { promisify } = core.loadExtScript("ext:deno_node/internal/util.mjs");
+@@ -79,6 +82,13 @@ const { os: osConstants } = core.loadExtScript(
+   "ext:deno_node/internal_binding/constants.ts",
+ );
+ 
++const abortedRegistry = new SafeFinalizationRegistry((heldValue) => {
++  const signal = WeakRefPrototypeDeref(heldValue.signal);
++  if (signal !== undefined) {
++    signal[abortSignal.remove](heldValue.algorithm);
++  }
++});
++
+ let process;
+ const lazyLoadProcess = core.createLazyLoader("node:process");
+ 
+@@ -254,17 +264,33 @@ function deprecate(
+ // deno-lint-ignore require-await
+ async function aborted(
+   signal,
+-  _resource,
++  resource,
+ ) {
+   if (signal === undefined) {
+     throw new ERR_INVALID_ARG_TYPE("signal", "AbortSignal", signal);
+   }
+   validateAbortSignal(signal, "signal");
++  validateObject(resource, "resource", {
++    allowArray: true,
++    allowFunction: true,
++  });
+   if (signal.aborted) {
+     return PromiseResolve();
+   }
+   const abortPromise = PromiseWithResolvers();
+-  signal[abortSignal.add](abortPromise.resolve);
++  const resourceRef = new SafeWeakRef(resource);
++  const algorithm = () => {
++    abortedRegistry.unregister(algorithm);
++    if (WeakRefPrototypeDeref(resourceRef) !== undefined) {
++      abortPromise.resolve();
++    }
++  };
++  signal[abortSignal.add](algorithm);
++  abortedRegistry.register(resource, {
++    __proto__: null,
++    signal: new SafeWeakRef(signal),
++    algorithm,
++  }, algorithm);
+   return abortPromise.promise;
+ }
+ 
+diff --git a/tests/unit_node/testdata/util_aborted_gc.ts b/tests/unit_node/testdata/util_aborted_gc.ts
+new file mode 100644
+index 00000000000000..552369264c1b77
+--- /dev/null
++++ b/tests/unit_node/testdata/util_aborted_gc.ts
+@@ -0,0 +1,37 @@
++// Copyright 2018-2026 the Deno authors. MIT license.
++
++import { aborted } from "node:util";
++
++declare const gc: (options?: object) => void;
++
++const signals: AbortSignal[] = [];
++let finalizedCount = 0;
++const registry = new FinalizationRegistry(() => finalizedCount++);
++const count = 100;
++
++function createPendingAbortedPromise() {
++  const resource = {};
++  const signal = AbortSignal.timeout(2 ** 31 - 1);
++  const promise = aborted(signal, resource);
++  registry.register(promise, undefined);
++  signals.push(signal);
++}
++
++for (let i = 0; i < count; i++) {
++  createPendingAbortedPromise();
++}
++
++function delay() {
++  return new Promise((resolve) => setTimeout(resolve, 0));
++}
++
++for (let i = 0; i < 30 && finalizedCount < count / 2; i++) {
++  gc({ type: "major", execution: "sync" });
++  await delay();
++}
++
++if (finalizedCount < count / 2) {
++  throw new Error(
++    `Expected pending aborted promises to be collectable, got ${finalizedCount}/${count}`,
++  );
++}
+diff --git a/tests/unit_node/util_test.ts b/tests/unit_node/util_test.ts
+index dab96b54fe1530..bdad94b77d2122 100644
+--- a/tests/unit_node/util_test.ts
++++ b/tests/unit_node/util_test.ts
+@@ -222,6 +222,21 @@ Deno.test("[util] aborted()", async () => {
+   assertEquals(done, true);
+ });
+ 
++Deno.test("[util] aborted() drops pending promise when resource is GCed", async () => {
++  const command = new Deno.Command(Deno.execPath(), {
++    args: [
++      "run",
++      "--quiet",
++      "--v8-flags=--expose-gc",
++      "tests/unit_node/testdata/util_aborted_gc.ts",
++    ],
++    stdout: "piped",
++    stderr: "piped",
++  });
++  const { code, stderr } = await command.output();
++  assertEquals(code, 0, new TextDecoder().decode(stderr));
++});
++
+ Deno.test("[util] styleText()", () => {
+   const redText = util.styleText("red", "error");
+   assertEquals(redText, "\x1B[31merror\x1B[39m");

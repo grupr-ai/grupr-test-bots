@@ -1,0 +1,109 @@
+diff --git a/tpl/collections/collections_integration_test.go b/tpl/collections/collections_integration_test.go
+index 88f62286fb9..6cd9639a79d 100644
+--- a/tpl/collections/collections_integration_test.go
++++ b/tpl/collections/collections_integration_test.go
+@@ -289,6 +289,51 @@ disableKinds = ['rss','sitemap', 'taxonomy', 'term', 'page']
+ 	b.AssertFileContentExact("public/index.html", "0: /a3_b1.html\n\n1: /b2.html\n\n2: /a1.html\n\n3: /a2.html\n$")
+ }
+ 
++// Issue 14777.
++func TestWhereWithPageEqualityIssue14777(t *testing.T) {
++	t.Parallel()
++
++	files := `
++-- hugo.toml --
++baseURL = 'http://example.com/'
++disableKinds = ['rss','sitemap','taxonomy','term']
++-- content/s1/_index.md --
++---
++title: S1
++---
++-- content/s1/p1.md --
++---
++title: P1
++---
++-- content/s1/p2.md --
++---
++title: P2
++---
++-- content/s2/_index.md --
++---
++title: S2
++---
++-- content/s2/p3.md --
++---
++title: P3
++---
++-- layouts/section.html --
++{{ $page := . }}
++WhereEq: {{ range where site.AllPages "Parent" "eq" $page }}{{ .Title }}|{{ end }}$
++WhereDefault: {{ range where site.AllPages "Parent" $page }}{{ .Title }}|{{ end }}$
++RangeIf: {{ range site.AllPages }}{{ if eq .Parent $page }}{{ .Title }}|{{ end }}{{ end }}$
++WhereNe: {{ range where site.AllPages "Parent" "ne" $page }}{{ .Title }}|{{ end }}$
++`
++
++	b := hugolib.Test(t, files)
++
++	b.AssertFileContent("public/s1/index.html",
++		"WhereEq: P1|P2|$",
++		"WhereDefault: P1|P2|$",
++		"RangeIf: P1|P2|$",
++	)
++}
++
+ // Issue 13621.
+ func TestWhereNotInEmptySlice(t *testing.T) {
+ 	t.Parallel()
+diff --git a/tpl/collections/where.go b/tpl/collections/where.go
+index 0cb84b8f560..7a813fd7cfd 100644
+--- a/tpl/collections/where.go
++++ b/tpl/collections/where.go
+@@ -23,6 +23,7 @@ import (
+ 	"github.com/gohugoio/hugo/common/hmaps"
+ 	"github.com/gohugoio/hugo/common/hreflect"
+ 	"github.com/gohugoio/hugo/common/hstrings"
++	"github.com/gohugoio/hugo/compare"
+ )
+ 
+ // Where returns a filtered subset of collection c.
+@@ -85,6 +86,16 @@ func (ns *Namespace) checkCondition(v, mv reflect.Value, op string) (bool, error
+ 		return false, nil
+ 	}
+ 
++	switch op {
++	case "", "=", "==", "eq", "!=", "<>", "ne":
++		if eq, ok := tryEq(v, mv); ok {
++			if op == "!=" || op == "<>" || op == "ne" {
++				return !eq, nil
++			}
++			return eq, nil
++		}
++	}
++
+ 	var ivp, imvp *int64
+ 	var fvp, fmvp *float64
+ 	var svp, smvp *string
+@@ -690,6 +701,23 @@ func (ns *Namespace) checkWhereMap(ctxv, seqv, kv, mv reflect.Value, path []stri
+ 
+ // toString returns the string value if possible, "" if not.
+ 
++// tryEq returns the equality of v and mv via the compare.Eqer interface
++// if either side implements it. The second return value reports whether
++// such a comparison was possible.
++func tryEq(v, mv reflect.Value) (bool, bool) {
++	if !v.CanInterface() || !mv.CanInterface() {
++		return false, false
++	}
++	vi, mvi := v.Interface(), mv.Interface()
++	if e, ok := vi.(compare.Eqer); ok {
++		return e.Eq(mvi), true
++	}
++	if e, ok := mvi.(compare.Eqer); ok {
++		return e.Eq(vi), true
++	}
++	return false, false
++}
++
+ func (ns *Namespace) toTimeUnix(v reflect.Value) int64 {
+ 	t, ok := hreflect.AsTime(v, ns.loc)
+ 	if !ok {

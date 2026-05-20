@@ -1,0 +1,148 @@
+diff --git a/turbopack/crates/turbo-tasks-backend/src/backend/mod.rs b/turbopack/crates/turbo-tasks-backend/src/backend/mod.rs
+index b940c7d4f418..c7f547215bcc 100644
+--- a/turbopack/crates/turbo-tasks-backend/src/backend/mod.rs
++++ b/turbopack/crates/turbo-tasks-backend/src/backend/mod.rs
+@@ -758,7 +758,7 @@ impl<B: BackingStorage> TurboTasksBackendInner<B> {
+         // done: true } it must have Output and would early return.
+         let old = task.set_in_progress(in_progress_state);
+         debug_assert!(old.is_none(), "InProgress already exists");
+-        ctx.schedule_task(task, TaskPriority::Initial);
++        ctx.schedule_task(task, TaskPriority::Recomputation);
+ 
+         Ok(Err(listener))
+     }
+@@ -896,7 +896,7 @@ impl<B: BackingStorage> TurboTasksBackendInner<B> {
+             TaskExecutionReason::CellNotAvailable,
+             EventDescription::new(|| task.get_task_desc_fn()),
+         );
+-        ctx.schedule_task(task, TaskPriority::Initial);
++        ctx.schedule_task(task, TaskPriority::Recomputation);
+ 
+         Ok(Err(listener))
+     }
+diff --git a/turbopack/crates/turbo-tasks-backend/src/backend/operation/invalidate.rs b/turbopack/crates/turbo-tasks-backend/src/backend/operation/invalidate.rs
+index e3ce46ea19a2..6b19f1dea005 100644
+--- a/turbopack/crates/turbo-tasks-backend/src/backend/operation/invalidate.rs
++++ b/turbopack/crates/turbo-tasks-backend/src/backend/operation/invalidate.rs
+@@ -1,6 +1,6 @@
+ use bincode::{Decode, Encode};
+ use smallvec::SmallVec;
+-use turbo_tasks::{TaskExecutionReason, TaskId, event::EventDescription};
++use turbo_tasks::{TaskExecutionReason, TaskId, TaskPriority, event::EventDescription};
+ 
+ use crate::{
+     backend::{
+@@ -224,6 +224,16 @@ pub fn make_task_dirty_internal(
+         *stale = true;
+     }
+     let current = task.get_dirty();
++    let parent_priority = ctx.get_current_task_priority();
++    let parent_priority = if matches!(parent_priority, TaskPriority::Recomputation) {
++        // When an invalidation was triggered during recomputation (or an initial execution that was
++        // triggered from recomputation), we do not want to treat that as recomputation.
++        // That would make recomputation to be very viral, and breaks ordering. So we reset
++        // execution order to initial.
++        TaskPriority::Initial
++    } else {
++        parent_priority
++    };
+     let (old_self_dirty, old_current_session_self_clean, parent_priority) = match current {
+         Some(Dirtyness::Dirty(current_priority)) => {
+             #[cfg(feature = "trace_task_dirty")]
+@@ -235,15 +245,15 @@ pub fn make_task_dirty_internal(
+             )
+             .entered();
+             // already dirty
+-            let parent_priority = ctx.get_current_task_priority();
+-            if *current_priority >= parent_priority {
++            if matches!(*current_priority, TaskPriority::Initial)
++                || *current_priority > parent_priority
++            {
+                 // Update the priority to be the lower one
+                 task.set_dirty(Dirtyness::Dirty(parent_priority));
+             }
+             return;
+         }
+         Some(Dirtyness::SessionDependent) => {
+-            let parent_priority = ctx.get_current_task_priority();
+             task.set_dirty(Dirtyness::Dirty(parent_priority));
+             // It was a session-dependent dirty before, so we need to remove that clean count
+             let was_current_session_clean = task.current_session_clean();
+@@ -265,7 +275,6 @@ pub fn make_task_dirty_internal(
+             }
+         }
+         None => {
+-            let parent_priority = ctx.get_current_task_priority();
+             task.set_dirty(Dirtyness::Dirty(parent_priority));
+             // It was clean before, so we need to increase the dirty count
+             (false, false, parent_priority)
+diff --git a/turbopack/crates/turbo-tasks/src/manager.rs b/turbopack/crates/turbo-tasks/src/manager.rs
+index 39564f1926cf..70b1f7c4b760 100644
+--- a/turbopack/crates/turbo-tasks/src/manager.rs
++++ b/turbopack/crates/turbo-tasks/src/manager.rs
+@@ -410,6 +410,7 @@ pub enum TaskPriority {
+     Invalidation {
+         priority: Reverse<u32>,
+     },
++    Recomputation,
+ }
+ 
+ impl TaskPriority {
+@@ -445,6 +446,7 @@ impl TaskPriority {
+                     *self
+                 }
+             }
++            TaskPriority::Recomputation => TaskPriority::Recomputation,
+         }
+     }
+ }
+@@ -454,6 +456,7 @@ impl Display for TaskPriority {
+         match self {
+             TaskPriority::Initial => write!(f, "initial"),
+             TaskPriority::Invalidation { priority } => write!(f, "invalidation({})", priority.0),
++            TaskPriority::Recomputation => write!(f, "recomputation"),
+         }
+     }
+ }
+diff --git a/turbopack/crates/turbo-tasks/src/task_execution_reason.rs b/turbopack/crates/turbo-tasks/src/task_execution_reason.rs
+index ffab24d2fcb7..74418c9c4af0 100644
+--- a/turbopack/crates/turbo-tasks/src/task_execution_reason.rs
++++ b/turbopack/crates/turbo-tasks/src/task_execution_reason.rs
+@@ -1,13 +1,28 @@
+ #[derive(Debug)]
+ pub enum TaskExecutionReason {
++    /// A root task was initially scheduled and is executed
+     Initial,
+-    Local,
++    /// A task output was read, but the output is not available, so the task was scheduled and
++    /// executed to produce the output
+     OutputNotAvailable,
++    /// A task cell was read, but the cell content is not available, so the task was scheduled and
++    /// executed to produce the cell content
+     CellNotAvailable,
++    /// A task was marked as dirty and is active on it's own (maybe root or currently awaited), so
++    /// it was scheduled and executed to update the task output
+     Invalidated,
++    /// A dirty task has been activated, so it was scheduled and executed to update the task output
+     ActivateDirty,
++    /// A task has been activated for the first time (no output yet), so it was scheduled and
++    /// executed to produce the task output
+     ActivateInitial,
++    /// A task was connected as child in `active_tracking == false` mode for the first time (no
++    /// output yet), so it was scheduled and executed to produce the task output.
++    /// Or a task was called inside of a turbo_tasks::run closure for the first time (no output
++    /// yet), so it was scheduled and executed to produce the task output.
+     Connect,
++    /// An in-progress task was marked as stale, so it was scheduled again after execution and is
++    /// executing again to update the task output.
+     Stale,
+ }
+ 
+@@ -15,7 +30,6 @@ impl TaskExecutionReason {
+     pub fn as_str(&self) -> &'static str {
+         match self {
+             TaskExecutionReason::Initial => "initial",
+-            TaskExecutionReason::Local => "local",
+             TaskExecutionReason::OutputNotAvailable => "output_not_available",
+             TaskExecutionReason::CellNotAvailable => "cell_not_available",
+             TaskExecutionReason::Invalidated => "invalidated",

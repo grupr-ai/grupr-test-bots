@@ -1,0 +1,79 @@
+diff --git a/completions.go b/completions.go
+index d3607c2d2..cc0596035 100644
+--- a/completions.go
++++ b/completions.go
+@@ -317,7 +317,10 @@ func (c *Command) getCompletions(args []string) (*Command, []Completion, ShellCo
+ 	// The last argument, which is not completely typed by the user,
+ 	// should not be part of the list of arguments
+ 	toComplete := args[len(args)-1]
+-	trimmedArgs := args[:len(args)-1]
++	// Copy trimmedArgs to a new slice to avoid mutating the caller's
++	// backing array (which may be os.Args) when later appending "--".
++	trimmedArgs := make([]string, len(args)-1)
++	copy(trimmedArgs, args[:len(args)-1])
+ 
+ 	var finalCmd *Command
+ 	var finalArgs []string
+diff --git a/completions_test.go b/completions_test.go
+index ec7b9076b..d8c1464dd 100644
+--- a/completions_test.go
++++ b/completions_test.go
+@@ -4072,3 +4072,58 @@ func TestCustomDefaultShellCompDirective(t *testing.T) {
+ 		})
+ 	}
+ }
++
++func TestCompletionDoesNotMutateOsArgs(t *testing.T) {
++	// Test for https://github.com/spf13/cobra/issues/2257
++	// Verify that os.Args is not corrupted when shell completion runs
++	// with TraverseChildren enabled.
++	//
++	// The bug: getCompletions() calls append(finalArgs, "--") where
++	// finalArgs is a sub-slice of the original args (from os.Args[1:]).
++	// If there's spare capacity, append writes "--" into the shared
++	// backing array, mutating os.Args in place.
++
++	// Save and restore os.Args since we need to override it.
++	origArgs := os.Args
++	defer func() { os.Args = origArgs }()
++
++	// Set os.Args to simulate: root __completeNoDesc x
++	// We do NOT use SetArgs so the code falls through to os.Args[1:].
++	// The program name must not be "cobra.test" to bypass the test guard
++	// in ExecuteC().
++	os.Args = []string{"root", ShellCompNoDescRequestCmd, "x"}
++
++	rootCmd := &Command{
++		Use:              "root",
++		TraverseChildren: true,
++		ValidArgsFunction: func(cmd *Command, args []string, toComplete string) ([]string, ShellCompDirective) {
++			return []string{"mycompletion"}, ShellCompDirectiveDefault
++		},
++		Run: emptyRun,
++	}
++
++	buf := new(bytes.Buffer)
++	rootCmd.SetOut(buf)
++	rootCmd.SetErr(buf)
++
++	_, err := rootCmd.ExecuteC()
++	if err != nil {
++		t.Fatalf("Unexpected error: %v", err)
++	}
++
++	// Without the fix, os.Args[2] would be changed from "x" to "--"
++	// because append(finalArgs, "--") in getCompletions wrote into
++	// the shared backing array of os.Args.
++	if len(os.Args) != 3 {
++		t.Fatalf("os.Args length changed: expected 3, got %d", len(os.Args))
++	}
++	if os.Args[0] != "root" {
++		t.Errorf("os.Args[0] was mutated: expected %q, got %q", "root", os.Args[0])
++	}
++	if os.Args[1] != ShellCompNoDescRequestCmd {
++		t.Errorf("os.Args[1] was mutated: expected %q, got %q", ShellCompNoDescRequestCmd, os.Args[1])
++	}
++	if os.Args[2] != "x" {
++		t.Errorf("os.Args[2] was mutated: expected %q, got %q", "x", os.Args[2])
++	}
++}

@@ -1,0 +1,81 @@
+C:\Dev\grupr-test-bots\scripts\disagreement-study\run_study.py:136: DeprecationWarning: The model 'claude-opus-4-20250514' is deprecated and will reach end-of-life on June 15th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  resp = client.messages.create(
+=== Study run: 29 PRs (starting at index 1) ===
+
+[1/29] denoland__deno-34142 (LoC=82, user=GRUPR_TEST_NEW_USER_EMAIL)
+    panel=ship-with-changes = single=ship-with-changes (panel 33s, single 18s)
+[2/29] denoland__deno-34189 (LoC=109, user=GRUPR_TEST_POWER_USER_EMAIL)
+    panel=ship-with-changes = single=ship-with-changes (panel 31s, single 22s)
+[3/29] denoland__deno-34206 (LoC=127, user=GRUPR_TEST_EXTERNAL_DEV_EMAIL)
+    panel=ship-with-changes = single=ship-with-changes (panel 23s, single 22s)
+[4/29] denoland__deno-34219 (LoC=56, user=GRUPR_TEST_CONV_A_EMAIL)
+    panel=ship-with-changes = single=ship-with-changes (panel 35s, single 32s)
+[5/29] django__django-21152 (LoC=29, user=GRUPR_TEST_CONV_B_EMAIL)
+    panel=ship-with-changes = single=ship-with-changes (panel 33s, single 16s)
+[6/29] django__django-21224 (LoC=50, user=GRUPR_TEST_CONV_C_EMAIL)
+    panel=ship = single=ship (panel 23s, single 18s)
+[7/29] django__django-21239 (LoC=130, user=GRUPR_TEST_NEW_USER_EMAIL)
+Traceback (most recent call last):
+  File "C:\Dev\grupr-test-bots\scripts\disagreement-study\run_study.py", line 320, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\Dev\grupr-test-bots\scripts\disagreement-study\run_study.py", line 311, in main
+    print(f"    panel={pv} {disagree} single={sv} (panel {panel_wall}s, single {single_wall}s)")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2260' in position 28: character maps to <undefined>
+C:\Dev\grupr-test-bots\scripts\disagreement-study\run_study.py:144: DeprecationWarning: The model 'claude-opus-4-20250514' is deprecated and will reach end-of-life on June 15th, 2026.
+Please migrate to a newer model. Visit https://docs.anthropic.com/en/docs/resources/model-deprecations for more information.
+  resp = client.messages.create(
+=== Study run: 22 PRs (starting at index 8) ===
+
+[1/22] django__django-21246 (LoC=25, user=GRUPR_TEST_NEW_USER_EMAIL)
+    panel=ship agrees single=ship (panel 21s, single 15s)
+[2/22] django__django-21271 (LoC=24, user=GRUPR_TEST_POWER_USER_EMAIL)
+    panel=ship agrees single=ship (panel 23s, single 13s)
+[3/22] fastapi__fastapi-15521 (LoC=85, user=GRUPR_TEST_EXTERNAL_DEV_EMAIL)
+    panel=ship agrees single=ship (panel 23s, single 19s)
+[4/22] fastapi__fastapi-15527 (LoC=89, user=GRUPR_TEST_CONV_A_EMAIL)
+    panel=ship-with-changes DIFFERS single=ship (panel 25s, single 15s)
+[5/22] fastapi__fastapi-15528 (LoC=89, user=GRUPR_TEST_CONV_B_EMAIL)
+    panel=ship agrees single=ship (panel 21s, single 15s)
+[6/22] fastapi__fastapi-15529 (LoC=99, user=GRUPR_TEST_CONV_C_EMAIL)
+    panel=ship agrees single=ship (panel 21s, single 16s)
+[7/22] fastapi__fastapi-15530 (LoC=98, user=GRUPR_TEST_NEW_USER_EMAIL)
+    panel=ship agrees single=ship (panel 27s, single 16s)
+[8/22] fastapi__fastapi-15548 (LoC=55, user=GRUPR_TEST_POWER_USER_EMAIL)
+    panel=ship-with-changes agrees single=ship-with-changes (panel 23s, single 14s)
+[9/22] gohugoio__hugo-14785 (LoC=73, user=GRUPR_TEST_EXTERNAL_DEV_EMAIL)
+    panel=ship agrees single=ship (panel 23s, single 15s)
+[10/22] gohugoio__hugo-14787 (LoC=22, user=GRUPR_TEST_CONV_A_EMAIL)
+    panel=ship-with-changes DIFFERS single=ship (panel 27s, single 17s)
+[11/22] gohugoio__hugo-14802 (LoC=81, user=GRUPR_TEST_CONV_B_EMAIL)
+    panel=ship-with-changes agrees single=ship-with-changes (panel 25s, single 17s)
+[12/22] gohugoio__hugo-14822 (LoC=21, user=GRUPR_TEST_CONV_C_EMAIL)
+    panel=ship agrees single=ship (panel 18s, single 10s)
+[13/22] remix-run__react-router-14981 (LoC=35, user=GRUPR_TEST_NEW_USER_EMAIL)
+    panel=ship agrees single=ship (panel 20s, single 12s)
+[14/22] spf13__cobra-2356 (LoC=60, user=GRUPR_TEST_POWER_USER_EMAIL)
+    panel=ship agrees single=ship (panel 27s, single 14s)
+[15/22] vercel__next.js-93763 (LoC=23, user=GRUPR_TEST_EXTERNAL_DEV_EMAIL)
+    panel=ship agrees single=ship (panel 21s, single 14s)
+[16/22] vercel__next.js-93766 (LoC=152, user=GRUPR_TEST_CONV_A_EMAIL)
+    panel=ship DIFFERS single=ship-with-changes (panel 22s, single 17s)
+[17/22] vercel__next.js-93784 (LoC=27, user=GRUPR_TEST_CONV_B_EMAIL)
+    panel=ship agrees single=ship (panel 16s, single 11s)
+[18/22] vercel__next.js-93824 (LoC=88, user=GRUPR_TEST_CONV_C_EMAIL)
+    panel=ship agrees single=ship (panel 25s, single 13s)
+[19/22] vercel__next.js-93827 (LoC=46, user=GRUPR_TEST_NEW_USER_EMAIL)
+    panel=ship-with-changes agrees single=ship-with-changes (panel 20s, single 14s)
+[20/22] vercel__next.js-93876 (LoC=44, user=GRUPR_TEST_POWER_USER_EMAIL)
+    panel=ship-with-changes agrees single=ship-with-changes (panel 27s, single 18s)
+[21/22] vercel__next.js-93919 (LoC=122, user=GRUPR_TEST_EXTERNAL_DEV_EMAIL)
+    panel=ship-with-changes DIFFERS single=ship (panel 27s, single 13s)
+[22/22] vercel__next.js-93920 (LoC=35, user=GRUPR_TEST_CONV_A_EMAIL)
+    panel=ship-with-changes DIFFERS single=ship (panel 23s, single 12s)
+
+=== Done in 918s (15m 18s) ===
+Aggregate: python scripts/disagreement-study/aggregate.py runs\disagreement-study-20260520T013836Z

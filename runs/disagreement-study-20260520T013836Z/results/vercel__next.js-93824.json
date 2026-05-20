@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93824,
+    "url": "https://github.com/vercel/next.js/pull/93824",
+    "title": "fix: renumber non-sequential errors in errors.json",
+    "merged_at": "2026-05-13T13:24:12Z",
+    "diff_loc": 88
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe specialists agree this is a straightforward error code renumbering with proper test updates. While the Security specialist raised concerns about the error message content (dynamic data access, JSON parsing, rendering intent), these are pre-existing issues in the error descriptions themselves, not introduced by this change. The renumbering is clean and consistent.\n\n**Most important issue**: None blocking. The Security concerns are about the existing error message content, not the renumbering itself.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Error code renumbering pattern is consistent** (lines 4-16): The diff shows a systematic renumbering of error codes from 1235-1247 to 1232-1242, following a clear pattern of subtracting 3 from each code. This maintains the structural integrity of the error mapping.\n\n2. **Test coupling is appropriately updated** (lines 24, 54, 1096, etc.): All test files that reference these error codes are updated consistently, showing proper coupling between the error definitions and their consumers. The architecture correctly maintains this dependency relationship.\n\n3. **Error message abstraction is preserved** (lines 4-16): The error messages themselves remain unchanged, only the numeric identifiers are modified. This demonstrates good separation between the error identification system and the error content, allowing for clean renumbering without affecting the actual error descriptions."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Potential for Injection via Dynamic Data Access** (lines 1230, 1231, 1240): The use of dynamic data access methods like `await connection()` and `fetch(...)` in `generateMetadata()` could potentially allow for injection vulnerabilities if not properly sanitized. Ensure that all dynamic data sources are validated and sanitized to prevent injection attacks. [OWASP A1: Injection]\n\n2. **Inadequate Error Handling in JSON Parsing** (lines 1236, 1239): The error messages related to JSON parsing failures indicate a potential lack of proper error handling when parsing JSON data. Ensure that JSON parsing operations have robust error handling to prevent failures from leading to application crashes or exposure of sensitive data. [OWASP A10: Insufficient Logging & Monitoring]\n\n3. **Dynamic Content Rendering without Explicit Intent** (lines 1242): The error descriptions indicate dynamic content rendering without explicit intent, which could lead to unpredictable application behavior and security issues. Ensure that all dynamic content is handled with a clear rendering strategy to avoid potential vulnerabilities and maintain application integrity. [OWASP A4: Insecure Design]"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe specialists agree this is a straightforward error code renumbering with proper test updates. While the Security specialist raised concerns about the error message content (dynamic data access, JSON parsing, rendering intent), these are pre-existing issues in the error descriptions themselves, not introduced by this change. The renumbering is clean and consistent.\n\n**Most important issue**: None blocking. The Security concerns are about the existing error message content, not the renumbering itself."
+      }
+    ],
+    "elapsed_s": 25,
+    "raw_grupr_id": "2e67f3ed-63af-404c-9fad-c3de22c7d1df",
+    "timed_out": false
+  },
+  "panel_wall_s": 25,
+  "single_model": {
+    "verdict": "ship",
+    "content": "**Verdict**: ship\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Error code renumbering is consistent** (lines 4-15): All error codes 1235-1247 have been renumbered to 1232-1242, maintaining the same sequence and content. This appears to be filling a gap in the error numbering sequence.\n\n2. **Test updates match error code changes** (lines 24, 54, 96, etc.): All test files have been updated to expect the new error codes (E1247 \u2192 E1242), ensuring tests remain passing after the renumbering.\n\n3. **No functional changes** (entire diff): This is purely a refactoring change that renumbers error codes without modifying any error messages, behavior, or functionality.\n\n**Notes** (lower-priority observations)\n\n- The renumbering suggests error codes 1232-1234 were previously unused or have been freed up\n- The change affects development and e2e tests for cache components and instant validation features\n- All error messages remain unchanged, preserving existing documentation references",
+    "elapsed_s": 13,
+    "input_tokens": 6293,
+    "output_tokens": 250
+  },
+  "single_wall_s": 13,
+  "user_email_var": "GRUPR_TEST_CONV_C_EMAIL",
+  "completed_at": "2026-05-20T02:01:08Z"
+}

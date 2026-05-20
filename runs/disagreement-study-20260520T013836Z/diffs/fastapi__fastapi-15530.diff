@@ -1,0 +1,205 @@
+diff --git a/docs/ja/docs/advanced/generate-clients.md b/docs/ja/docs/advanced/generate-clients.md
+index b3472880ed700..eee8575f6a081 100644
+--- a/docs/ja/docs/advanced/generate-clients.md
++++ b/docs/ja/docs/advanced/generate-clients.md
+@@ -30,7 +30,6 @@ FastAPI は自動的に **OpenAPI 3.1** の仕様を生成します。したが
+ 
+ 例えば、次のようなものがあります:
+ 
+-* [Speakeasy](https://speakeasy.com/editor?utm_source=fastapi+repo&utm_medium=github+sponsorship)
+ * [Stainless](https://www.stainless.com/?utm_source=fastapi&utm_medium=referral)
+ * [liblab](https://developers.liblab.com/tutorials/sdk-for-fastapi?utm_source=fastapi)
+ 
+diff --git a/docs/ja/docs/index.md b/docs/ja/docs/index.md
+index a8b9741985001..2068874eb276f 100644
+--- a/docs/ja/docs/index.md
++++ b/docs/ja/docs/index.md
+@@ -54,18 +54,27 @@ FastAPI は、Python の標準である型ヒントに基づいて Python で AP
+ 
+ ### Keystone Sponsor { #keystone-sponsor }
+ 
++<div class="fastapi-sponsors fastapi-sponsors--keystone">
+ {% for sponsor in sponsors.keystone -%}
+-<a href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img src="{{ sponsor.img }}" style="border-radius:15px"></a>
++<a class="fastapi-sponsors__card fastapi-sponsors__card--keystone" href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img class="fastapi-sponsors__banner" src="{{ sponsor.img }}" alt="{{ sponsor.title }}"></a>
+ {% endfor -%}
++</div>
+ 
+-### Gold and Silver Sponsors { #gold-and-silver-sponsors }
++### Gold Sponsors { #gold-sponsors }
+ 
++<div class="fastapi-sponsors fastapi-sponsors--gold">
+ {% for sponsor in sponsors.gold -%}
+-<a href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img src="{{ sponsor.img }}" style="border-radius:15px"></a>
++<a class="fastapi-sponsors__card fastapi-sponsors__card--gold" href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img class="fastapi-sponsors__banner" src="{{ sponsor.img }}" alt="{{ sponsor.title }}" loading="lazy"></a>
+ {% endfor -%}
+-{%- for sponsor in sponsors.silver -%}
+-<a href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img src="{{ sponsor.img }}" style="border-radius:15px"></a>
++</div>
++
++### Silver Sponsors { #silver-sponsors }
++
++<div class="fastapi-sponsors fastapi-sponsors--silver">
++{% for sponsor in sponsors.silver -%}
++<a class="fastapi-sponsors__card fastapi-sponsors__card--silver" href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img class="fastapi-sponsors__banner" src="{{ sponsor.img }}" alt="{{ sponsor.title }}" loading="lazy"></a>
+ {% endfor %}
++</div>
+ 
+ <!-- /sponsors -->
+ 
+@@ -73,6 +82,44 @@ FastAPI は、Python の標準である型ヒントに基づいて Python で AP
+ 
+ ## 評価 { #opinions }
+ 
++<!-- only-mkdocs -->
++<div class="fastapi-opinions" data-fastapi-opinions>
++  <div class="fastapi-opinions__tabs" role="tablist" aria-label="Companies using FastAPI">
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-microsoft" aria-controls="fo-panel-microsoft" aria-selected="true" tabindex="0">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/microsoft.svg" alt="Microsoft" loading="lazy"></span>
++    </button>
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-uber" aria-controls="fo-panel-uber" aria-selected="false" tabindex="-1">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/uber.svg" alt="Uber" loading="lazy"></span>
++    </button>
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-netflix" aria-controls="fo-panel-netflix" aria-selected="false" tabindex="-1">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/netflix.svg" alt="Netflix" loading="lazy"></span>
++    </button>
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-cisco" aria-controls="fo-panel-cisco" aria-selected="false" tabindex="-1">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/cisco.svg" alt="Cisco" loading="lazy"></span>
++    </button>
++  </div>
++
++  <div class="fastapi-opinions__panel" id="fo-panel-microsoft" role="tabpanel" aria-labelledby="fo-tab-microsoft" tabindex="0">
++    <blockquote class="fastapi-opinions__quote">「最近は **FastAPI** をたくさん使っています。実際、私のチームの **Microsoft の ML サービス** 全てで使用する予定です。そのいくつかはコアな **Windows** 製品や **Office** 製品に統合されつつあります。」</blockquote>
++    <div class="fastapi-opinions__attr">— Kabir Khan, <strong>Microsoft</strong> <a href="https://github.com/fastapi/fastapi/pull/26">(ref)</a></div>
++  </div>
++  <div class="fastapi-opinions__panel" id="fo-panel-uber" role="tabpanel" aria-labelledby="fo-tab-uber" tabindex="0" hidden>
++    <blockquote class="fastapi-opinions__quote">「**FastAPI** ライブラリを採用し、クエリで **予測値** を取得できる **REST** サーバを構築しました。」<em>[for Ludwig]</em></blockquote>
++    <div class="fastapi-opinions__attr">— Piero Molino, Yaroslav Dudin, Sai Sumanth Miryala, <strong>Uber</strong> <a href="https://eng.uber.com/ludwig-v0-2/">(ref)</a></div>
++  </div>
++  <div class="fastapi-opinions__panel" id="fo-panel-netflix" role="tabpanel" aria-labelledby="fo-tab-netflix" tabindex="0" hidden>
++    <blockquote class="fastapi-opinions__quote">「<strong>Netflix</strong> は、私たちの <strong>危機管理</strong> オーケストレーションフレームワーク、<strong>Dispatch</strong> のオープンソースリリースを発表できることをうれしく思います！」<em>[built with FastAPI]</em></blockquote>
++    <div class="fastapi-opinions__attr">— Kevin Glisson, Marc Vilanova, Forest Monsen, <strong>Netflix</strong> <a href="https://netflixtechblog.com/introducing-dispatch-da4b8a2a8072">(ref)</a></div>
++  </div>
++  <div class="fastapi-opinions__panel" id="fo-panel-cisco" role="tabpanel" aria-labelledby="fo-tab-cisco" tabindex="0" hidden>
++    <blockquote class="fastapi-opinions__quote">「本番の Python API を構築したい方には、**FastAPI** を強くおすすめします。**美しく設計**され、**使いやすく**、**高いスケーラビリティ**があります。私たちの API ファースト開発戦略の **主要コンポーネント** となりました。」</blockquote>
++    <div class="fastapi-opinions__attr">— Deon Pillsbury, <strong>Cisco</strong> <a href="https://www.linkedin.com/posts/deonpillsbury_cisco-cx-python-activity-6963242628536487936-trAp/">(ref)</a></div>
++  </div>
++</div>
++<!-- /only-mkdocs -->
++
++<div class="only-github" markdown="1">
++
+ "_[...] 最近 **FastAPI** を使っています。 [...] 実際に私のチームの全ての **Microsoft の機械学習サービス** で使用する予定です。 そのうちのいくつかのコアな **Windows** 製品と **Office** 製品に統合されつつあります。_"
+ 
+ <div style="text-align: right; margin-right: 10%;">Kabir Khan - <strong>Microsoft</strong> <a href="https://github.com/fastapi/fastapi/pull/26"><small>(ref)</small></a></div>
+@@ -91,37 +138,25 @@ FastAPI は、Python の標準である型ヒントに基づいて Python で AP
+ 
+ ---
+ 
+-"_私は **FastAPI** にワクワクしています。 めちゃくちゃ楽しいです！_"
+-
+-<div style="text-align: right; margin-right: 10%;">Brian Okken - <strong>[Python Bytes](https://pythonbytes.fm/episodes/show/123/time-to-right-the-py-wrongs?time_in_sec=855) podcast host</strong> <a href="https://x.com/brianokken/status/1112220079972728832"><small>(ref)</small></a></div>
+-
+----
+-
+-"_正直、あなたが作ったものは超堅実で洗練されているように見えます。いろんな意味で、それは私が **Hug** にそうなってほしかったものです。誰かがそれを作るのを見るのは本当に刺激的です。_"
++"_本番運用の Python API を構築したい方には、**FastAPI** を強くおすすめします。**美しく設計**されており、**使いやすく**、**高いスケーラビリティ**があります。私たちの API ファースト開発戦略の **主要コンポーネント** となり、Virtual TAC Engineer などの多くの自動化やサービスを推進しています。_"
+ 
+-<div style="text-align: right; margin-right: 10%;">Timothy Crosley - <strong>[Hug](https://github.com/hugapi/hug) creator</strong> <a href="https://news.ycombinator.com/item?id=19455465"><small>(ref)</small></a></div>
++<div style="text-align: right; margin-right: 10%;">Deon Pillsbury - <strong>Cisco</strong> <a href="https://www.linkedin.com/posts/deonpillsbury_cisco-cx-python-activity-6963242628536487936-trAp/"><small>(ref)</small></a></div>
+ 
+ ---
+ 
+-"_REST API を構築するための **モダンなフレームワーク** を学びたい方は、**FastAPI** [...] をチェックしてみてください。 [...] 高速で、使用・習得が簡単です [...]_"
+-
+-"_私たちの **API** は **FastAPI** に切り替えました [...] きっと気に入ると思います [...]_"
+-
+-<div style="text-align: right; margin-right: 10%;">Ines Montani - Matthew Honnibal - <strong>[Explosion AI](https://explosion.ai) founders - [spaCy](https://spacy.io) creators</strong> <a href="https://x.com/_inesmontani/status/1144173225322143744"><small>(ref)</small></a> - <a href="https://x.com/honnibal/status/1144031421859655680"><small>(ref)</small></a></div>
+-
+----
++</div>
+ 
+-"_本番運用の Python API を構築したい方には、**FastAPI** を強くおすすめします。**美しく設計**されており、**使いやすく**、**高いスケーラビリティ**があります。私たちの API ファースト開発戦略の **主要コンポーネント** となり、Virtual TAC Engineer などの多くの自動化やサービスを推進しています。_"
++## FastAPI Conf { #fastapi-conf }
+ 
+-<div style="text-align: right; margin-right: 10%;">Deon Pillsbury - <strong>Cisco</strong> <a href="https://www.linkedin.com/posts/deonpillsbury_cisco-cx-python-activity-6963242628536487936-trAp/"><small>(ref)</small></a></div>
++[**FastAPI Conf '26**](https://fastapiconf.com) は **2026 年 10 月 28 日** に **オランダ・アムステルダム** で開催されます。FastAPI のすべてを、ソースから直接。🎤
+ 
+----
++<a class="fastapi-feature-banner" href="https://fastapiconf.com"><img src="https://fastapi.tiangolo.com/img/fastapi-conf.jpeg" alt="FastAPI Conf '26 - 2026年10月28日 - オランダ・アムステルダム"></a>
+ 
+ ## FastAPI ミニドキュメンタリー { #fastapi-mini-documentary }
+ 
+ 2025 年末に公開された [FastAPI ミニドキュメンタリー](https://www.youtube.com/watch?v=mpR8ngthqiE)があります。オンラインで視聴できます:
+ 
+-<a href="https://www.youtube.com/watch?v=mpR8ngthqiE"><img src="https://fastapi.tiangolo.com/img/fastapi-documentary.jpg" alt="FastAPI Mini Documentary"></a>
++<a class="fastapi-feature-banner" href="https://www.youtube.com/watch?v=mpR8ngthqiE"><img src="https://fastapi.tiangolo.com/img/fastapi-documentary.jpg" alt="FastAPI Mini Documentary"></a>
+ 
+ ## **Typer**、CLI 版 FastAPI { #typer-the-fastapi-of-clis }
+ 
+diff --git a/docs/ja/docs/virtual-environments.md b/docs/ja/docs/virtual-environments.md
+index 21b7cd47271ab..633825b6457d1 100644
+--- a/docs/ja/docs/virtual-environments.md
++++ b/docs/ja/docs/virtual-environments.md
+@@ -2,7 +2,7 @@
+ 
+ Pythonプロジェクトの作業では、**仮想環境**（または類似の仕組み）を使用し、プロジェクトごとにインストールするパッケージを分離するべきでしょう。
+ 
+-/// info | 情報
++/// note | 備考
+ 
+ もし、仮想環境の概要や作成方法、使用方法について既にご存知なら、このセクションをスキップした方がよいかもしれません。🤓
+ 
+@@ -18,7 +18,8 @@ Pythonプロジェクトの作業では、**仮想環境**（または類似の
+ 
+ ///
+ 
+-/// info | 情報
++/// note | 備考
++
+ このページでは、**仮想環境**の使用方法と、そのはたらきについて説明します。
+ 
+ もし**すべてを管理するツール**（Pythonのインストールも含む）を導入する準備ができているなら、[uv](https://github.com/astral-sh/uv) をお試しください。
+@@ -554,7 +555,7 @@ Pythonをインストールしたとき、ファイルを含んだいくつか
+ <div class="termy">
+ 
+ ```console
+-// Don't run this now, it's just an example 🤓
++// 今は実行しないでください。これは単なる例です 🤓
+ $ pip install "fastapi[standard]"
+ ---> 100%
+ ```
+@@ -800,7 +801,7 @@ $ cd ~/code/prisoner-of-azkaban
+ 
+ $ python main.py
+ 
+-// Error importing sirius, it's not installed 😱
++// sirius のインポートエラー。インストールされていません 😱
+ Traceback (most recent call last):
+     File "main.py", line 1, in <module>
+         import sirius
+@@ -808,20 +809,20 @@ Traceback (most recent call last):
+ 
+ </div>
+ 
+-しかし、その仮想環境を無効化し、 `prisoner-of-askaban` のための新しい仮想環境を有効にすれば、 `python` を実行したときに `prisoner-of-azkaban` （アズカバンの囚人）の仮想環境の Python が使用されるようになります。
++しかし、その仮想環境を無効化し、 `prisoner-of-azkaban` のための新しい仮想環境を有効にすれば、 `python` を実行したときに `prisoner-of-azkaban` （アズカバンの囚人）の仮想環境の Python が使用されるようになります。
+ 
+ <div class="termy">
+ 
+ ```console
+ $ cd ~/code/prisoner-of-azkaban
+ 
+-// You don't need to be in the old directory to deactivate, you can do it wherever you are, even after going to the other project 😎
++// 無効化のために古いディレクトリにいる必要はありません。どこにいても、他のプロジェクトに移動した後でも実行できます 😎
+ $ deactivate
+ 
+-// Activate the virtual environment in prisoner-of-azkaban/.venv 🚀
++// prisoner-of-azkaban/.venv の仮想環境を有効化する 🚀
+ $ source .venv/bin/activate
+ 
+-// Now when you run python, it will find the package sirius installed in this virtual environment ✨
++// これで python を実行すると、この仮想環境にインストールされた sirius パッケージが見つかります ✨
+ $ python main.py
+ 
+ I solemnly swear 🐺

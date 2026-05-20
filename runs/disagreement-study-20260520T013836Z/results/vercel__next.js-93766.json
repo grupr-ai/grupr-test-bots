@@ -1,0 +1,45 @@
+{
+  "pr": {
+    "repo": "vercel/next.js",
+    "pr_number": 93766,
+    "url": "https://github.com/vercel/next.js/pull/93766",
+    "title": "Craigandrews/ensure isr lru is written if requests collapsed",
+    "merged_at": "2026-05-12T19:50:36Z",
+    "diff_loc": 152
+  },
+  "panel": {
+    "verdict": "ship",
+    "synth_content": "**Overall verdict**: ship\n\nThe code changes represent a clean architectural improvement that moves the minimal mode LRU population from `handleRevalidate` to `get`, ensuring all callers (including batched invocations) properly populate the cache. The Architect correctly identifies this as improving separation of concerns and simplifying method signatures.\n\nThe Security reviewer raises concerns about potential injection vectors in the test helper `makeCacheEntry`, but this is test-only code using hardcoded strings. The cache poisoning concern about `invocationID` manipulation is theoretical - the code shows `invocationID` is passed through from the caller and used as part of cache key construction, which is the expected behavior.\n\n**Most important issue**: None that blocks shipping. The architectural improvements are sound, and the security concerns are either test-only or theoretical without evidence of actual vulnerabilities in the production code paths.",
+    "per_skill": [
+      {
+        "reviewer": "Architect",
+        "verdict": "ship",
+        "content": "**Verdict**: ship\n\nTop 3 findings:\n\n1. **Improved separation of concerns** (lines 298-303, 474-475): Moving the minimal mode LRU population from `handleRevalidate` to `get` properly separates cache management logic from revalidation logic. This makes the caching behavior more explicit and easier to understand.\n\n2. **Cleaner method signatures** (lines 373, 426, 453): Removing the `invocationID` parameter from the `doRevalidate` and `handleRevalidate` methods reduces coupling and simplifies the internal API. The invocation ID is now only used where it's actually needed (in `get`).\n\n3. **Well-structured test organization** (lines 7-102): The test file demonstrates good abstraction with helper functions (`mockIncrementalCache`, `makeCacheEntry`) that reduce duplication and make test intent clear. Test names accurately describe the specific behaviors being verified."
+      },
+      {
+        "reviewer": "Security",
+        "verdict": "ship-with-changes",
+        "content": "**Verdict**: ship-with-changes\n\nTop 3 findings:\n\n1. **Potential Injection Vector in `makeCacheEntry`**: The `html` parameter in the `makeCacheEntry` function (line 10) is directly used to generate cache entries without sanitization. Although this is test code, ensuring that any HTML content is sanitized before usage is crucial to prevent XSS or other injection attacks in production code. [OWASP A07:2021 - Identification and Authentication Failures]\n\n2. **Secrets Management**: The test code does not appear to handle any secrets directly, but it's essential to ensure that any test data mimicking production data does not inadvertently contain or expose secrets or sensitive information. While not directly observed in the provided code, it's a reminder to maintain a strict separation between test and production environments. [OWASP A02:2021 - Cryptographic Failures]\n\n3. **Cache Poisoning**: The usage of cache keys in `get` (lines 298-303) and potential manipulation through `invocationID` highlights the importance of ensuring that cache keys cannot be manipulated to poison cache entries. This could lead to unauthorized access or incorrect data being served. Ensure that cache keys are generated securely and validated. [OWASP A04:2021 - Insecure Design]"
+      },
+      {
+        "reviewer": "Synthesizer",
+        "verdict": "ship",
+        "content": "**Overall verdict**: ship\n\nThe code changes represent a clean architectural improvement that moves the minimal mode LRU population from `handleRevalidate` to `get`, ensuring all callers (including batched invocations) properly populate the cache. The Architect correctly identifies this as improving separation of concerns and simplifying method signatures.\n\nThe Security reviewer raises concerns about potential injection vectors in the test helper `makeCacheEntry`, but this is test-only code using hardcoded strings. The cache poisoning concern about `invocationID` manipulation is theoretical - the code shows `invocationID` is passed through from the caller and used as part of cache key construction, which is the expected behavior.\n\n**Most important issue**: None that blocks shipping. The architectural improvements are sound, and the security concerns are either test-only or theoretical without evidence of actual vulnerabilities in the production code paths."
+      }
+    ],
+    "elapsed_s": 22,
+    "raw_grupr_id": "e793f303-d94b-491f-82a4-5336ff83c529",
+    "timed_out": false
+  },
+  "panel_wall_s": 22,
+  "single_model": {
+    "verdict": "ship-with-changes",
+    "content": "**Verdict**: ship-with-changes\n\n**Top 3 findings** (with line refs from the diff, ordered by importance)\n\n1. **Line 298-303**: The LRU cache population logic has been moved from `handleRevalidate` to the `get` method, but it's placed after the response is returned from the batcher. This means it only executes for the \"winner\" of batched calls, not for all callers as the test expects. The cache set should happen inside the batcher callback to ensure all batched invocations populate their respective cache entries.\n\n2. **Line 64**: The test expects `renderCount` to be 1, confirming only one render happens for batched calls. However, the test then expects both invocation-a and invocation-b to have their entries in the LRU cache (line 76), which contradicts the current implementation where only the winner populates the cache.\n\n3. **Line 373**: The `invocationID` parameter was removed from the `doRevalidate` call but is still being passed in the `context` object (line 352). This is inconsistent - either fully remove invocationID handling or keep it throughout the call chain.\n\n**Notes** (lower-priority observations)\n\n- The test file is well-structured and covers the intended scenarios effectively\n- The removal of the `waitUntil` parameter from some function signatures (lines 426, 433) appears to be cleanup, but verify this doesn't break any background revalidation logic\n- Consider adding a test case for when the TTL expires to ensure the cache behaves correctly",
+    "elapsed_s": 17,
+    "input_tokens": 2351,
+    "output_tokens": 356
+  },
+  "single_wall_s": 17,
+  "user_email_var": "GRUPR_TEST_CONV_A_EMAIL",
+  "completed_at": "2026-05-20T01:59:56Z"
+}

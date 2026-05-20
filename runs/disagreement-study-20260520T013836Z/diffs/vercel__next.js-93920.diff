@@ -1,0 +1,77 @@
+diff --git a/package.json b/package.json
+index d61c7bbdb4a4..23e3ddd1c36d 100644
+--- a/package.json
++++ b/package.json
+@@ -350,7 +350,8 @@
+       "@types/node@20.17.6": "patches/@types__node@20.17.6.patch",
+       "taskr@1.1.0": "patches/taskr@1.1.0.patch",
+       "minizlib@3.1.0": "patches/minizlib@3.1.0.patch",
+-      "http-proxy@1.18.1": "patches/http-proxy@1.18.1.patch"
++      "http-proxy@1.18.1": "patches/http-proxy@1.18.1.patch",
++      "playwright-core@1.58.2": "patches/playwright-core@1.58.2.patch"
+     }
+   }
+ }
+diff --git a/patches/playwright-core@1.58.2.patch b/patches/playwright-core@1.58.2.patch
+new file mode 100644
+index 000000000000..85c4a9e6cff0
+--- /dev/null
++++ b/patches/playwright-core@1.58.2.patch
+@@ -0,0 +1,24 @@
++diff --git a/lib/client/browserContext.js b/lib/client/browserContext.js
++index 0b5cb3356cdc4917d9198a184f1a2cb391924453..3ad3d86bebde7a7e25af4f94b964d003e10d40a0 100644
++--- a/lib/client/browserContext.js
+++++ b/lib/client/browserContext.js
++@@ -183,6 +183,19 @@ class BrowserContext extends import_channelOwner.ChannelOwner {
++   _onRequestFailed(request, responseEndTiming, failureText, page) {
++     request._failureText = failureText || null;
++     request._setResponseEndTiming(responseEndTiming);
+++    // PATCH (next.js): mirror what `_onRequestFinished` does for the
+++    // response, so callers awaiting `response.finished()` don't hang on
+++    // failed/canceled requests. The server side already resolves the
+++    // server-side `_finishedPromise` from `_onLoadingFailed` (see
+++    // chromium/crNetworkManager.js), but only the `requestFinished` IPC
+++    // carries a response payload — `requestFailed` does not, so the
+++    // client-side Response's `_finishedPromise` is otherwise never
+++    // resolved. We look up the response via the existing async RPC and
+++    // resolve it fire-and-forget; catch is a no-op so we never produce
+++    // an unhandled rejection if the context tears down concurrently.
+++    request.response().then((response) => {
+++      if (response !== null) response._finishedPromise.resolve(null);
+++    }).catch(() => {});
++     this.emit(import_events.Events.BrowserContext.RequestFailed, request);
++     if (page)
++       page.emit(import_events.Events.Page.RequestFailed, request);
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 038969333694..d549d66b5f49 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -34,6 +34,9 @@ patchedDependencies:
+   minizlib@3.1.0:
+     hash: o4nv5mg6kfnuzlknbdln3azhvu
+     path: patches/minizlib@3.1.0.patch
++  playwright-core@1.58.2:
++    hash: jzsvxuc7w6vcysg5v4e5lyjitq
++    path: patches/playwright-core@1.58.2.patch
+   stacktrace-parser@0.1.10:
+     hash: x5tdcojc7b5m2b5ojepbcdl36a
+     path: patches/stacktrace-parser@0.1.10.patch
+@@ -35120,15 +35123,15 @@ snapshots:
+ 
+   playwright-chromium@1.58.2:
+     dependencies:
+-      playwright-core: 1.58.2
++      playwright-core: 1.58.2(patch_hash=jzsvxuc7w6vcysg5v4e5lyjitq)
+ 
+   playwright-core@1.51.1: {}
+ 
+-  playwright-core@1.58.2: {}
++  playwright-core@1.58.2(patch_hash=jzsvxuc7w6vcysg5v4e5lyjitq): {}
+ 
+   playwright@1.58.2:
+     dependencies:
+-      playwright-core: 1.58.2
++      playwright-core: 1.58.2(patch_hash=jzsvxuc7w6vcysg5v4e5lyjitq)
+     optionalDependencies:
+       fsevents: 2.3.2
+ 

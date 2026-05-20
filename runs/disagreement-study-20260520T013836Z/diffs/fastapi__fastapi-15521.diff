@@ -1,0 +1,161 @@
+diff --git a/docs/ru/docs/advanced/generate-clients.md b/docs/ru/docs/advanced/generate-clients.md
+index 75bd7c47c413a..dfedc5dc07bd7 100644
+--- a/docs/ru/docs/advanced/generate-clients.md
++++ b/docs/ru/docs/advanced/generate-clients.md
+@@ -30,7 +30,6 @@ FastAPI автоматически генерирует спецификации
+ 
+ Например, вы можете попробовать:
+ 
+-* [Speakeasy](https://speakeasy.com/editor?utm_source=fastapi+repo&utm_medium=github+sponsorship)
+ * [Stainless](https://www.stainless.com/?utm_source=fastapi&utm_medium=referral)
+ * [liblab](https://developers.liblab.com/tutorials/sdk-for-fastapi?utm_source=fastapi)
+ 
+diff --git a/docs/ru/docs/index.md b/docs/ru/docs/index.md
+index 5694b9f29eb02..10184990b26be 100644
+--- a/docs/ru/docs/index.md
++++ b/docs/ru/docs/index.md
+@@ -40,7 +40,7 @@ FastAPI — это современный, быстрый (высокопрои
+ * **Скорость**: Очень высокая производительность, на уровне **NodeJS** и **Go** (благодаря Starlette и Pydantic). [Один из самых быстрых доступных фреймворков Python](#performance).
+ * **Быстрота разработки**: Увеличьте скорость разработки фич примерно на 200–300%. *
+ * **Меньше ошибок**: Сократите примерно на 40% количество ошибок, вызванных человеком (разработчиком). *
+-* **Интуитивность**: Отличная поддержка редактора кода. <dfn title="также известное как: автодополнение, автозавершение, IntelliSense">Автозавершение</dfn> везде. Меньше времени на отладку.
++* **Интуитивность**: Отличная поддержка редактора кода. <dfn title="также известно как: автозавершение, IntelliSense">Автозавершение</dfn> везде. Меньше времени на отладку.
+ * **Простота**: Разработан так, чтобы его было легко использовать и осваивать. Меньше времени на чтение документации.
+ * **Краткость**: Минимизируйте дублирование кода. Несколько возможностей из каждого объявления параметров. Меньше ошибок.
+ * **Надежность**: Получите код, готовый к продакшн. С автоматической интерактивной документацией.
+@@ -54,18 +54,27 @@ FastAPI — это современный, быстрый (высокопрои
+ 
+ ### Ключевой-спонсор { #keystone-sponsor }
+ 
++<div class="fastapi-sponsors fastapi-sponsors--keystone">
+ {% for sponsor in sponsors.keystone -%}
+-<a href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img src="{{ sponsor.img }}" style="border-radius:15px"></a>
++<a class="fastapi-sponsors__card fastapi-sponsors__card--keystone" href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img class="fastapi-sponsors__banner" src="{{ sponsor.img }}" alt="{{ sponsor.title }}"></a>
+ {% endfor -%}
++</div>
+ 
+-### Золотые и серебряные спонсоры { #gold-and-silver-sponsors }
++### Золотые спонсоры { #gold-sponsors }
+ 
++<div class="fastapi-sponsors fastapi-sponsors--gold">
+ {% for sponsor in sponsors.gold -%}
+-<a href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img src="{{ sponsor.img }}" style="border-radius:15px"></a>
++<a class="fastapi-sponsors__card fastapi-sponsors__card--gold" href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img class="fastapi-sponsors__banner" src="{{ sponsor.img }}" alt="{{ sponsor.title }}" loading="lazy"></a>
+ {% endfor -%}
+-{%- for sponsor in sponsors.silver -%}
+-<a href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img src="{{ sponsor.img }}" style="border-radius:15px"></a>
++</div>
++
++### Серебряные спонсоры { #silver-sponsors }
++
++<div class="fastapi-sponsors fastapi-sponsors--silver">
++{% for sponsor in sponsors.silver -%}
++<a class="fastapi-sponsors__card fastapi-sponsors__card--silver" href="{{ sponsor.url }}" title="{{ sponsor.title }}"><img class="fastapi-sponsors__banner" src="{{ sponsor.img }}" alt="{{ sponsor.title }}" loading="lazy"></a>
+ {% endfor %}
++</div>
+ 
+ <!-- /sponsors -->
+ 
+@@ -73,6 +82,44 @@ FastAPI — это современный, быстрый (высокопрои
+ 
+ ## Мнения { #opinions }
+ 
++<!-- only-mkdocs -->
++<div class="fastapi-opinions" data-fastapi-opinions>
++  <div class="fastapi-opinions__tabs" role="tablist" aria-label="Компании, использующие FastAPI">
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-microsoft" aria-controls="fo-panel-microsoft" aria-selected="true" tabindex="0">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/microsoft.svg" alt="Microsoft" loading="lazy"></span>
++    </button>
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-uber" aria-controls="fo-panel-uber" aria-selected="false" tabindex="-1">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/uber.svg" alt="Uber" loading="lazy"></span>
++    </button>
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-netflix" aria-controls="fo-panel-netflix" aria-selected="false" tabindex="-1">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/netflix.svg" alt="Netflix" loading="lazy"></span>
++    </button>
++    <button class="fastapi-opinions__tab" role="tab" type="button" id="fo-tab-cisco" aria-controls="fo-panel-cisco" aria-selected="false" tabindex="-1">
++      <span class="fastapi-opinions__mark"><img src="/img/logos/cisco.svg" alt="Cisco" loading="lazy"></span>
++    </button>
++  </div>
++
++  <div class="fastapi-opinions__panel" id="fo-panel-microsoft" role="tabpanel" aria-labelledby="fo-tab-microsoft" tabindex="0">
++    <blockquote class="fastapi-opinions__quote">«В последнее время я много где использую <strong>FastAPI</strong>. На самом деле я планирую использовать его для всех <strong>ML-сервисов моей команды в Microsoft</strong>. Некоторые из них интегрируются в основной продукт <strong>Windows</strong>, а некоторые — в продукты <strong>Office</strong>».</blockquote>
++    <div class="fastapi-opinions__attr">— Kabir Khan, <strong>Microsoft</strong> <a href="https://github.com/fastapi/fastapi/pull/26">(ref)</a></div>
++  </div>
++  <div class="fastapi-opinions__panel" id="fo-panel-uber" role="tabpanel" aria-labelledby="fo-tab-uber" tabindex="0" hidden>
++    <blockquote class="fastapi-opinions__quote">«Мы начали использовать библиотеку <strong>FastAPI</strong>, чтобы поднять <strong>REST</strong>-сервер, к которому можно обращаться за <strong>предсказаниями</strong>». <em>[для Ludwig]</em></blockquote>
++    <div class="fastapi-opinions__attr">— Piero Molino, Yaroslav Dudin, Sai Sumanth Miryala, <strong>Uber</strong> <a href="https://eng.uber.com/ludwig-v0-2/">(ref)</a></div>
++  </div>
++  <div class="fastapi-opinions__panel" id="fo-panel-netflix" role="tabpanel" aria-labelledby="fo-tab-netflix" tabindex="0" hidden>
++    <blockquote class="fastapi-opinions__quote">«<strong>Netflix</strong> рада объявить об открытом релизе нашего фреймворка оркестрации <strong>антикризисного управления</strong>: <strong>Dispatch</strong>!» <em>[создан с помощью FastAPI]</em></blockquote>
++    <div class="fastapi-opinions__attr">— Kevin Glisson, Marc Vilanova, Forest Monsen, <strong>Netflix</strong> <a href="https://netflixtechblog.com/introducing-dispatch-da4b8a2a8072">(ref)</a></div>
++  </div>
++  <div class="fastapi-opinions__panel" id="fo-panel-cisco" role="tabpanel" aria-labelledby="fo-tab-cisco" tabindex="0" hidden>
++    <blockquote class="fastapi-opinions__quote">«Если вы собираетесь делать продакшн-API на Python, я настоятельно рекомендую <strong>FastAPI</strong>. Он <strong>прекрасно спроектирован</strong>, <strong>прост в использовании</strong> и <strong>отлично масштабируется</strong> — он стал <strong>ключевым компонентом</strong> нашей стратегии API-first».</blockquote>
++    <div class="fastapi-opinions__attr">— Deon Pillsbury, <strong>Cisco</strong> <a href="https://www.linkedin.com/posts/deonpillsbury_cisco-cx-python-activity-6963242628536487936-trAp/">(ref)</a></div>
++  </div>
++</div>
++<!-- /only-mkdocs -->
++
++<div class="only-github" markdown="1">
++
+ "_[...] В последнее время я много где использую **FastAPI**. [...] На самом деле я планирую использовать его для всех **ML-сервисов моей команды в Microsoft**. Некоторые из них интегрируются в основной продукт **Windows**, а некоторые — в продукты **Office**._"
+ 
+ <div style="text-align: right; margin-right: 10%;">Kabir Khan - <strong>Microsoft</strong> <a href="https://github.com/fastapi/fastapi/pull/26"><small>(ref)</small></a></div>
+@@ -91,37 +138,25 @@ FastAPI — это современный, быстрый (высокопрои
+ 
+ ---
+ 
+-"_Я в полном восторге от **FastAPI**. Это так весело!_"
+-
+-<div style="text-align: right; margin-right: 10%;">Brian Okken - <strong>Ведущий подкаста [Python Bytes](https://pythonbytes.fm/episodes/show/123/time-to-right-the-py-wrongs?time_in_sec=855)</strong> <a href="https://x.com/brianokken/status/1112220079972728832"><small>(ref)</small></a></div>
+-
+----
+-
+-"_Честно говоря, то, что вы создали, выглядит очень солидно и отполировано. Во многих смыслах это то, чем я хотел видеть **Hug** — очень вдохновляет видеть, как кто-то это создал._"
++"_Если кто-то собирается делать продакшн-API на Python, я настоятельно рекомендую **FastAPI**. Он **прекрасно спроектирован**, **прост в использовании** и **отлично масштабируется**, стал **ключевым компонентом** нашей стратегии API-first и приводит в действие множество автоматизаций и сервисов, таких как наш Virtual TAC Engineer._"
+ 
+-<div style="text-align: right; margin-right: 10%;">Timothy Crosley - <strong>Создатель [Hug](https://github.com/hugapi/hug)</strong> <a href="https://news.ycombinator.com/item?id=19455465"><small>(ref)</small></a></div>
++<div style="text-align: right; margin-right: 10%;">Deon Pillsbury - <strong>Cisco</strong> <a href="https://www.linkedin.com/posts/deonpillsbury_cisco-cx-python-activity-6963242628536487936-trAp/"><small>(ref)</small></a></div>
+ 
+ ---
+ 
+-"_Если вы хотите изучить один **современный фреймворк** для создания REST API, посмотрите **FastAPI** [...] Он быстрый, простой в использовании и лёгкий в изучении [...]_"
+-
+-"_Мы переключились на **FastAPI** для наших **API** [...] Думаю, вам тоже понравится [...]_"
+-
+-<div style="text-align: right; margin-right: 10%;">Ines Montani - Matthew Honnibal - <strong>Основатели [Explosion AI](https://explosion.ai) — создатели [spaCy](https://spacy.io)</strong> <a href="https://x.com/_inesmontani/status/1144173225322143744"><small>(ref)</small></a> - <a href="https://x.com/honnibal/status/1144031421859655680"><small>(ref)</small></a></div>
+-
+----
++</div>
+ 
+-"_Если кто-то собирается делать продакшн-API на Python, я настоятельно рекомендую **FastAPI**. Он **прекрасно спроектирован**, **прост в использовании** и **отлично масштабируется**, стал **ключевым компонентом** нашей стратегии API-first и приводит в действие множество автоматизаций и сервисов, таких как наш Virtual TAC Engineer._"
++## FastAPI Conf { #fastapi-conf }
+ 
+-<div style="text-align: right; margin-right: 10%;">Deon Pillsbury - <strong>Cisco</strong> <a href="https://www.linkedin.com/posts/deonpillsbury_cisco-cx-python-activity-6963242628536487936-trAp/"><small>(ref)</small></a></div>
++[**FastAPI Conf '26**](https://fastapiconf.com) пройдёт **28 октября 2026** в **Амстердаме, Нидерланды**. Всё о FastAPI — из первых рук. 🎤
+ 
+----
++<a class="fastapi-feature-banner" href="https://fastapiconf.com"><img src="https://fastapi.tiangolo.com/img/fastapi-conf.jpeg" alt="FastAPI Conf '26 — 28 октября 2026 — Амстердам, Нидерланды"></a>
+ 
+ ## Мини-документальный фильм о FastAPI { #fastapi-mini-documentary }
+ 
+ В конце 2025 года вышел [мини-документальный фильм о FastAPI](https://www.youtube.com/watch?v=mpR8ngthqiE), вы можете посмотреть его онлайн:
+ 
+-<a href="https://www.youtube.com/watch?v=mpR8ngthqiE"><img src="https://fastapi.tiangolo.com/img/fastapi-documentary.jpg" alt="FastAPI Mini Documentary"></a>
++<a class="fastapi-feature-banner" href="https://www.youtube.com/watch?v=mpR8ngthqiE"><img src="https://fastapi.tiangolo.com/img/fastapi-documentary.jpg" alt="FastAPI Mini Documentary"></a>
+ 
+ ## **Typer**, FastAPI для CLI { #typer-the-fastapi-of-clis }
+ 
+diff --git a/docs/ru/docs/virtual-environments.md b/docs/ru/docs/virtual-environments.md
+index 633137d09eb47..2addc869de96f 100644
+--- a/docs/ru/docs/virtual-environments.md
++++ b/docs/ru/docs/virtual-environments.md
+@@ -819,7 +819,7 @@ Traceback (most recent call last):
+ 
+ </div>
+ 
+-Но если вы деактивируете виртуальное окружение и активируете новое для `prisoner-of-askaban`, тогда при запуске `python` он будет использовать Python из виртуального окружения `prisoner-of-azkaban`.
++Но если вы деактивируете виртуальное окружение и активируете новое для `prisoner-of-azkaban`, тогда при запуске `python` он будет использовать Python из виртуального окружения `prisoner-of-azkaban`.
+ 
+ <div class="termy">
+ 
