@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "idx": 8,
+    "snippet": "snippet-09-unsafe-eval",
+    "email": "bret.babcock+gtb-newuser@gmail.com",
+    "review_id": "08f32581-2b2b-444c-940a-3304ee4a414b",
+    "status": "completed",
+    "patch_status": "verified",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 40.1,
+    "error_code": "",
+    "error_message": "",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "08f32581-2b2b-444c-940a-3304ee4a414b",
+    "user_id": "5d6e6003-0f3f-4ff8-a47d-0ecd2f6dd936",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def parse_config(raw):\n    # eval on untrusted input \u2014 RCE\n    return eval(raw)\n\nif __name__ == \"__main__\":\n    print(parse_config(\"{'k': 1}\"))\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.616823Z",
+    "updated_at": "2026-05-20T20:50:53.793088Z",
+    "completed_at": "2026-05-20T20:50:53.793088Z"
+  },
+  "raw_patch": {
+    "patch_id": "e7fe53eb-131e-4343-b27f-d50dd2d6331e",
+    "review_id": "08f32581-2b2b-444c-940a-3304ee4a414b",
+    "diff": "diff --git a/source.txt b/source.txt\nindex c5f20bd..c0874e4 100644\n--- a/source.txt\n+++ b/source.txt\n@@ -1,8 +1,7 @@\n-def first_or_none(list):\n-    # shadows builtin 'list'\n-    if len(list) == 0:\n+def first_or_none(items):\n+    if len(items) == 0:\n         return None\n-    return list[0]\n+    return items[0]\n \n if __name__ == \"__main__\":\n     print(first_or_none([1, 2, 3]))\n",
+    "files_changed": [
+      "source.txt"
+    ],
+    "verified": true,
+    "created_at": "2026-05-20T20:50:54.898707Z"
+  },
+  "synthesizer_verdict": ""
+}

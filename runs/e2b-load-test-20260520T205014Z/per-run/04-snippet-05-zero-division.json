@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "idx": 4,
+    "snippet": "snippet-05-zero-division",
+    "email": "bret.babcock+gtb-conv-a@gmail.com",
+    "review_id": "21b3152b-2de1-4a4b-a000-890f118a2f7a",
+    "status": "completed",
+    "patch_status": "",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 43.56,
+    "error_code": "no_patch",
+    "error_message": "patch fetch failed: No patch generated for this review",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "21b3152b-2de1-4a4b-a000-890f118a2f7a",
+    "user_id": "3c6b1d81-4a68-43d7-a2a0-b6b3774ca7f4",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def average(values):\n    # crashes on empty list \u2014 no guard\n    return sum(values) / len(values)\n\nif __name__ == \"__main__\":\n    print(average([1, 2, 3]))\n    print(average([]))\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.386221Z",
+    "updated_at": "2026-05-20T20:50:59.526448Z",
+    "completed_at": "2026-05-20T20:50:59.526448Z"
+  },
+  "raw_patch": null,
+  "synthesizer_verdict": ""
+}

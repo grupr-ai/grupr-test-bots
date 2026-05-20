@@ -20,6 +20,10 @@ runs/*/
 # headline stat; full run preserved for auditability + reproducibility.
 !runs/disagreement-study-20260520T013836Z/
 !runs/disagreement-study-20260520T013836Z/**
+# Day-12 E2B Deep-tier load test — pre-launch evidence that 10 concurrent
+# sandbox runs satisfy the P95 < 5min criterion (HANDOFF.md item #7).
+!runs/e2b-load-test-20260520T205014Z/
+!runs/e2b-load-test-20260520T205014Z/**
 
 # One-off smoke-test artifacts dropped in repo root
 smoke-code-review-wrappers.json

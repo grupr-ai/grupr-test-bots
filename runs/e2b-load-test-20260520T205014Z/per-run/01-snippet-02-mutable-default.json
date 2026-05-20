@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "idx": 1,
+    "snippet": "snippet-02-mutable-default",
+    "email": "bret.babcock+gtb-poweruser@gmail.com",
+    "review_id": "fc9b000b-6800-4aad-97d9-bd4c84187791",
+    "status": "completed",
+    "patch_status": "verified",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 43.71,
+    "error_code": "",
+    "error_message": "",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "fc9b000b-6800-4aad-97d9-bd4c84187791",
+    "user_id": "98074aed-4a2c-4134-8b4f-22289d895e9b",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def append_item(item, items=[]):\n    # mutable-default anti-pattern: items persists across calls\n    items.append(item)\n    return items\n\nif __name__ == \"__main__\":\n    print(append_item(\"a\"))\n    print(append_item(\"b\"))\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.574459Z",
+    "updated_at": "2026-05-20T20:50:59.380744Z",
+    "completed_at": "2026-05-20T20:50:59.380744Z"
+  },
+  "raw_patch": {
+    "patch_id": "5dc0fafe-1780-47d1-891f-f7973274fa60",
+    "review_id": "fc9b000b-6800-4aad-97d9-bd4c84187791",
+    "diff": "diff --git a/source.txt b/source.txt\nindex 426fb71..2b31f08 100644\n--- a/source.txt\n+++ b/source.txt\n@@ -1,7 +1,7 @@\n def safe_int(value):\n     try:\n         return int(value)\n-    except:  # bare except swallows KeyboardInterrupt + SystemExit\n+    except (ValueError, TypeError):\n         return None\n \n if __name__ == \"__main__\":\n",
+    "files_changed": [
+      "source.txt"
+    ],
+    "verified": true,
+    "created_at": "2026-05-20T20:50:59.630459Z"
+  },
+  "synthesizer_verdict": ""
+}

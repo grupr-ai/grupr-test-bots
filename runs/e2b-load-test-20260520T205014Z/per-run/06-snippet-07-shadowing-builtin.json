@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "idx": 6,
+    "snippet": "snippet-07-shadowing-builtin",
+    "email": "bret.babcock+gtb-conv-c@gmail.com",
+    "review_id": "f8d2a5c8-9f7c-49d1-8cdc-4fd57b0735b7",
+    "status": "completed",
+    "patch_status": "",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 39.66,
+    "error_code": "no_patch",
+    "error_message": "patch fetch failed: No patch generated for this review",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "f8d2a5c8-9f7c-49d1-8cdc-4fd57b0735b7",
+    "user_id": "bfcb8fb6-a26d-4dc6-90a8-3868fa0777c0",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def first_or_none(list):\n    # shadows builtin 'list'\n    if len(list) == 0:\n        return None\n    return list[0]\n\nif __name__ == \"__main__\":\n    print(first_or_none([1, 2, 3]))\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.55634Z",
+    "updated_at": "2026-05-20T20:50:55.393149Z",
+    "completed_at": "2026-05-20T20:50:55.393149Z"
+  },
+  "raw_patch": null,
+  "synthesizer_verdict": ""
+}

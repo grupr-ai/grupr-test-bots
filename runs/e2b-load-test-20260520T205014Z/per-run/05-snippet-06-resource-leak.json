@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "idx": 5,
+    "snippet": "snippet-06-resource-leak",
+    "email": "bret.babcock+gtb-conv-b@gmail.com",
+    "review_id": "807ecd32-4473-4ca1-9676-6d604a4f34c8",
+    "status": "completed",
+    "patch_status": "verified",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 39.71,
+    "error_code": "",
+    "error_message": "",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "807ecd32-4473-4ca1-9676-6d604a4f34c8",
+    "user_id": "06dd3e22-b3e4-4fc5-89ac-4adc9ae716eb",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def read_first_line(path):\n    # file never closed \u2014 should use with-statement\n    f = open(path)\n    line = f.readline()\n    return line.strip()\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.554422Z",
+    "updated_at": "2026-05-20T20:50:54.715879Z",
+    "completed_at": "2026-05-20T20:50:54.715879Z"
+  },
+  "raw_patch": {
+    "patch_id": "bd30107c-d9de-4b8e-8f92-061a8cc02a26",
+    "review_id": "807ecd32-4473-4ca1-9676-6d604a4f34c8",
+    "diff": "diff --git a/source.txt b/source.txt\nindex 2375285..43c7893 100644\n--- a/source.txt\n+++ b/source.txt\n@@ -1,9 +1,6 @@\n def join_words(words):\n     # O(n^2) string concat in a loop \u2014 should use ''.join\n-    result = \"\"\n-    for w in words:\n-        result = result + w + \" \"\n-    return result.strip()\n+    return ' '.join(words)\n \n if __name__ == \"__main__\":\n     print(join_words([\"foo\", \"bar\", \"baz\"]))\n",
+    "files_changed": [
+      "source.txt"
+    ],
+    "verified": true,
+    "created_at": "2026-05-20T20:50:48.867839Z"
+  },
+  "synthesizer_verdict": ""
+}

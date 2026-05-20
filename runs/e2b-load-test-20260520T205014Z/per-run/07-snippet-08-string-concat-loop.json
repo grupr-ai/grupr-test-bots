@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "idx": 7,
+    "snippet": "snippet-08-string-concat-loop",
+    "email": "bret.babcock+gtb-admin@gmail.com",
+    "review_id": "5d85318c-df03-4ca5-9f08-f2788d481040",
+    "status": "completed",
+    "patch_status": "",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 35.61,
+    "error_code": "no_patch",
+    "error_message": "patch fetch failed: No patch generated for this review",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "5d85318c-df03-4ca5-9f08-f2788d481040",
+    "user_id": "b1c7d26d-b464-446b-8291-aa8fb17c89cf",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def join_words(words):\n    # O(n^2) string concat in a loop \u2014 should use ''.join\n    result = \"\"\n    for w in words:\n        result = result + w + \" \"\n    return result.strip()\n\nif __name__ == \"__main__\":\n    print(join_words([\"foo\", \"bar\", \"baz\"]))\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.491637Z",
+    "updated_at": "2026-05-20T20:50:49.167935Z",
+    "completed_at": "2026-05-20T20:50:49.167935Z"
+  },
+  "raw_patch": null,
+  "synthesizer_verdict": ""
+}

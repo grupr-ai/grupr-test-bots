@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "idx": 3,
+    "snippet": "snippet-04-sql-injection-shape",
+    "email": "bret.babcock+gtb-adversary@gmail.com",
+    "review_id": "24352d47-44f7-4c44-b1b9-b2ee3cc961f3",
+    "status": "completed",
+    "patch_status": "",
+    "approved_at_state": "awaiting_patch",
+    "wall_s": 39.66,
+    "error_code": "no_patch",
+    "error_message": "patch fetch failed: No patch generated for this review",
+    "timed_out": false
+  },
+  "raw_review": {
+    "review_id": "24352d47-44f7-4c44-b1b9-b2ee3cc961f3",
+    "user_id": "1c04c099-9d9e-4fb4-9260-857c2ee31847",
+    "tier": "deep",
+    "status": "completed",
+    "input_type": "paste",
+    "input_payload": {
+      "code": "def fetch_user_by_name(cursor, name):\n    # f-string SQL injection vector \u2014 use parameterized query\n    query = f\"SELECT * FROM users WHERE name = '{name}'\"\n    cursor.execute(query)\n    return cursor.fetchall()\n"
+    },
+    "reviewer_roles": [],
+    "created_at": "2026-05-20T20:50:23.576624Z",
+    "updated_at": "2026-05-20T20:50:53.444659Z",
+    "completed_at": "2026-05-20T20:50:53.444659Z"
+  },
+  "raw_patch": null,
+  "synthesizer_verdict": ""
+}
