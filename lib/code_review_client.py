@@ -56,7 +56,7 @@ REVIEWERS: list[dict[str, str]] = [
     },
     {
         "role": "performance", "display_name": "Performance",
-        "provider": "groq", "model_id": "llama-3.3-70b-versatile",
+        "provider": "anthropic", "model_id": "claude-sonnet-4-5-20250929",
         "system_prompt": (
             "You are the Performance reviewer in a multi-LLM code review. "
             "Focus on algorithmic complexity, hot paths, N+1, caching, blocking ops. "
@@ -65,7 +65,7 @@ REVIEWERS: list[dict[str, str]] = [
     },
     {
         "role": "maintainability", "display_name": "Maintainability",
-        "provider": "groq", "model_id": "llama-3.3-70b-versatile",
+        "provider": "openai", "model_id": "gpt-4o-mini",
         "system_prompt": (
             "You are the Maintainability reviewer in a multi-LLM code review. "
             "Focus on readability, dead/duplicated code, comments, test coverage gaps. "
