@@ -460,6 +460,74 @@ class UserClient:
             json={"agent_id": agent_id},
         )
 
+    # ── Code Review API (Deep tier — Stage 2 Verified Patch) ─────
+    # Quick + Smart tiers still flow through the AI-Workshop dispatch
+    # path (see lib/code_review_client.py for the Quick orchestrator).
+    # Deep tier has its own dedicated endpoints because it kicks off a
+    # sandboxed agent + verification, not a chat thread.
+
+    def create_code_review_deep(
+        self,
+        code: str,
+        reviewer_roles: list[str] | None = None,
+        grupr_id: str | None = None,
+    ) -> str:
+        """POST /api/code-review with tier=deep. Returns review_id.
+
+        The orchestrator kicks off asynchronously — poll via
+        `get_code_review(review_id)` until status is terminal, then
+        fetch the verified patch via `get_code_review_patch(review_id)`.
+
+        `input_type` is hardcoded to "paste" because git_url is not yet
+        wired on the server (Item 9 work).
+        """
+        body_json: dict[str, Any] = {
+            "tier": "deep",
+            "input_type": "paste",
+            "input_payload": {"code": code},
+        }
+        if reviewer_roles:
+            body_json["reviewer_roles"] = reviewer_roles
+        if grupr_id:
+            body_json["grupr_id"] = grupr_id
+        _, body = self._request("POST", "/api/code-review", json=body_json)
+        data = body.get("data", body)
+        return data.get("review_id", "")
+
+    def get_code_review(self, review_id: str) -> dict[str, Any]:
+        """GET /api/code-review/:id. Returns the full review row incl.
+        status (pending|running|done|failed), reviewer outputs, and
+        timestamps. Poll this until status is terminal.
+        """
+        _, body = self._request("GET", f"/api/code-review/{review_id}")
+        return body.get("data", body)
+
+    def get_code_review_patch(self, review_id: str) -> dict[str, Any]:
+        """GET /api/code-review/:id/patch. Returns the verified patch
+        (Deep tier only). Shape includes `diff` (unified diff str),
+        `verification_report` (test/lint/typecheck output), and
+        `patch_status` (verified|unverified|none).
+        """
+        _, body = self._request("GET", f"/api/code-review/{review_id}/patch")
+        return body.get("data", body)
+
+    def approve_code_review(self, review_id: str, action: str = "generate_patch", note: str = "") -> dict[str, Any]:
+        """POST /api/code-review/:id/approve. Advances the Deep-tier state
+        machine past a gated step.
+
+        Deep tier reaches `awaiting_patch` after the synthesizer posts and
+        waits for the user to explicitly approve generating the patch
+        (cost-gated — patcher spins up an E2B sandbox + runs Claude Code).
+        Call with action="generate_patch" to advance, or action="cancel"
+        to abort.
+        """
+        _, body = self._request(
+            "POST",
+            f"/api/code-review/{review_id}/approve",
+            json={"action": action, "note": note},
+        )
+        return body.get("data", body)
+
     # ── exposed accessor for the runner ──────────────────────────
 
     @property
