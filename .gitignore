@@ -24,6 +24,10 @@ runs/*/
 # sandbox runs satisfy the P95 < 5min criterion (HANDOFF.md item #7).
 !runs/e2b-load-test-20260520T205014Z/
 !runs/e2b-load-test-20260520T205014Z/**
+# Day-12 prompt-injection pen-test — pre-launch evidence for the Deep
+# tier security review (HANDOFF.md item #31 §4.5). Live result: PASS.
+!runs/pentest-prompt-injection-20260521T010715Z/
+!runs/pentest-prompt-injection-20260521T010715Z/**
 
 # One-off smoke-test artifacts dropped in repo root
 smoke-code-review-wrappers.json
